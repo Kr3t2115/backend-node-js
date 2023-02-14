@@ -4,7 +4,8 @@ const queryLoginUser = require('./queries');
 const checkPassword = require('./controller');
 
 router.get("/", (req, res) => {
-  
+  //res.clearCookie('token')
+  res.send("xd")
 })
 
 router.post("/login", (req, res) => {
@@ -18,8 +19,8 @@ router.post("/login", (req, res) => {
       if (error) 
         throw error
       else{
-        checkPassword(password, result.rows)
-        res.status(200).json(result.rows)
+        checkPassword(password, result.rows, res)
+        // res.status(200).json(result.rows)
       }
         
     })
