@@ -11,16 +11,16 @@ const checkPassword = (password, hashedPassword, res) => {
     console.log("dsadsa" + password, hashedPassword[0].password)
 }
 
-const validateRegister = (req) => {
+const validateRegister = (registerData) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if(!req.body.firstname || !req.body.lastname || !req.body.email || !req.body.password){
+    if(!registerData.firstname || !registerData.lastname || !registerData.email || !registerData.password){
         return 100;
-      }else if(req.body.password.length < 8){
+      }else if(registerData.password.length < 8 || !registerData.password.match(/\d/) || !registerData.password.match(/[a-z]/) || !registerData.password.match(/[A-Z]/)){
         return 101;
-      }else if(req.body.firstname.length < 3 || req.body.lastname.length < 3){
+      }else if(registerData.firstname.length < 3 || registerData.lastname.length < 3){
         return 102;
-      }else if(!emailRegex.test(req.body.email)){
+      }else if(!emailRegex.test(registerData.email)){
         return 103;
       }
 }
@@ -56,7 +56,6 @@ const validateLogin = (loginData) => {
 }
 
 const comparePassword = (password, hashedPassword) => {
-  console.log(password + " " + hashedPassword)
     if (bcrypt.compareSync(password, hashedPassword)) {
         return true;
       } else {

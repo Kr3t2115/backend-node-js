@@ -27,10 +27,10 @@ const queryEmail = async (email) => {
   return result.rowCount;
 }
 
-const registerUser = async (req, hashedPassword) => {
+const registerUser = async (registerData, hashedPassword) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `INSERT INTO users (firstname, lastname, email, password) VALUES ('${req.body.firstname}', '${req.body.lastname}', '${req.body.email}', '${hashedPassword}');`
+    text: `INSERT INTO users (firstname, lastname, email, password) VALUES ('${registerData.firstname}', '${registerData.lastname}', '${registerData.email}', '${hashedPassword}');`
   })
 
   if(result.rowCount == 1){
@@ -42,7 +42,6 @@ const registerUser = async (req, hashedPassword) => {
 }
 
 const queryAccount = async (email) => {
-  console.log("email " +email )
   const result = await pool.query({
     rowMode: 'object',
     text: `SELECT * FROM users WHERE email='${email}';`

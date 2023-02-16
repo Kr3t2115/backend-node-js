@@ -28,8 +28,6 @@ router.post("/login", async (req, res) => {
 
     const doesAccountExists = await queryAccount(loginData.email)
 
-    console.log(doesAccountExists);
-
     if(!doesAccountExists){
       res.status(404).json({
         "error_message": "We cant find account with that email",
@@ -64,7 +62,14 @@ router.post("/login", async (req, res) => {
 router.post("/register", async (req, res) => {
   try {
 
-    const validateError = validateRegister(req, res)
+    const registerData = {
+      "firstname": req.body.firstname,
+      "lastname": req.body.lastname,
+      "email": req.body.email.toLowerCase(),
+      "password": req.body.password
+    }
+
+    const validateError = validateRegister(registerData)
     if(validateError){
       res.status(400).json({
         "error_message": "There was a problem validating the submitted data, check the error_code for more information",
@@ -73,7 +78,7 @@ router.post("/register", async (req, res) => {
       return;
     }
 
-    const isEmailBusy = await queryEmail(req.body.email)
+    const isEmailBusy = await queryEmail(registerData.email)
     if(isEmailBusy != 0){
       res.status(409).json({
         "error_message": "There was a problem with adding the account to the system because the email address was taken, check the error_code for more information",
@@ -82,12 +87,12 @@ router.post("/register", async (req, res) => {
       return;
     }
 
-    const hashedPassword = hashPassword(req.body.password)
+    const hashedPassword = hashPassword(registerData.password)
 
-    const registerPassed = registerUser(req, hashedPassword)
+    const registerPassed = registerUser(registerData, hashedPassword)
 
     if(registerPassed){
-      const token = generateJWT(req.body.email);
+      const token = generateJWT(registerData.email);
       res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)})
       res.status(200).json({
         "success_message": "The account has been successfully registered",
@@ -102,6 +107,7 @@ router.post("/register", async (req, res) => {
       
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       "error_message": "There was a unidentified problem",
       "error_code": 123
