@@ -33,13 +33,36 @@ const hashPassword = (password) => {
     return hash;
 }
 
-const checkPasswords = (hash) => {
-    if (bcrypt.compareSync("12342s1211", hashedPassword)) {
-        console.log('Użytkownik został zalogowany.');
+const generateJWT = (email) => {
+  const token = jwt.sign({
+    'email': email
+  }, 
+  process.env.ACCESS_KEY, 
+  {expiresIn: '12h'})
+  return token;
+  
+}
+
+const validateLogin = (loginData) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if(!loginData.email || !loginData.password){
+      return 150;
+    }else if(loginData.password.length < 8){
+      return 151;
+    }else if(!emailRegex.test(loginData.email)){
+      return 152;
+  }
+}
+
+const comparePassword = (password, hashedPassword) => {
+  console.log(password + " " + hashedPassword)
+    if (bcrypt.compareSync(password, hashedPassword)) {
+        return true;
       } else {
-        console.log('Nieprawidłowe hasło.');
+        return false;
       }
 }
 
 
-module.exports = { checkPassword, validateRegister, hashPassword }
+module.exports = { checkPassword, validateRegister, hashPassword, generateJWT, validateLogin, comparePassword }

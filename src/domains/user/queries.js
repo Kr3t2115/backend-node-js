@@ -41,4 +41,20 @@ const registerUser = async (req, hashedPassword) => {
   
 }
 
-module.exports = {queryLoginUser, queryUsers, queryEmail, registerUser}
+const queryAccount = async (email) => {
+  console.log("email " +email )
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `SELECT * FROM users WHERE email='${email}';`
+  })
+
+  if(result.rowCount == 1){
+    return result.rows[0];
+  }else{
+    return false
+  }
+  
+}
+
+
+module.exports = {queryLoginUser, queryUsers, queryEmail, registerUser, queryAccount}
