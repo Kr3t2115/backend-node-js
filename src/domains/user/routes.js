@@ -1,12 +1,30 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const {queryLoginUser, queryEmail, registerUser, queryAccount} = require('./queries');
 const {validateRegister, checkPassword, hashPassword, generateJWT, validateLogin, comparePassword} = require('./controller');
 
+function authenticateToken(req, res, next) {
+  const token = req.cookies.token;
+  if (token == null) return res.sendStatus(401)
 
-router.get("/", (req, res) => {
-  //res.clearCookie('token')
-  res.send("xd")
+  jwt.verify(token, process.env.ACCESS_KEY, (err, user) => {
+    if (err) 
+      return res.sendStatus(403)
+
+    req.user = user
+
+    next()
+  })
+}
+
+router.get("/ping", authenticateToken, (req, res) => {
+  res.status(200).json({"response": "pong"})
+})
+
+router.get("/logout", authenticateToken, (req, res) => {
+  res.clearCookie('token')
+  res.json({"logout": "wylogowano"})
 })
 
 router.post("/login", async (req, res) => {
