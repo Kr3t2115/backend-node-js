@@ -1,16 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const checkPassword = (password, hashedPassword, res) => {
-    const ACCESS_KEY = process.env.ACCESS_KEY;
-    const payload = {'password': password};
-    console.log(ACCESS_KEY)
-    const token = jwt.sign(payload, ACCESS_KEY, {expiresIn: '12h'})
-    res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)})
-    res.send("xd")
-    console.log("dsadsa" + password, hashedPassword[0].password)
-}
-
 const validateRegister = (registerData) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,12 +23,15 @@ const hashPassword = (password) => {
     return hash;
 }
 
-const generateJWT = (email) => {
+const generateJWT = (email, id) => {
   const token = jwt.sign({
-    'email': email
+    'email': email,
+    'id': id
   }, 
   process.env.ACCESS_KEY, 
-  {expiresIn: '12h'})
+  {
+    expiresIn: '12h'
+  })
   return token;
   
 }
@@ -64,4 +57,4 @@ const comparePassword = (password, hashedPassword) => {
 }
 
 
-module.exports = { checkPassword, validateRegister, hashPassword, generateJWT, validateLogin, comparePassword }
+module.exports = { validateRegister, hashPassword, generateJWT, validateLogin, comparePassword }

@@ -1,23 +1,5 @@
 const pool = require('../../config/db')
 
-const queryUsers = (callback) => {
-  pool.query('SELECT * FROM users', (error, result) => {
-    if (error) {
-      callback(result)
-    }
-    callback(null, result)
-  })
-}
-
-const queryLoginUser = (email, callback) => {
-  pool.query(`SELECT ID, firstname, lastname, email, password FROM users WHERE email='${email}'`, (error, result) => {
-    if (error) { 
-      callback(result)
-    }
-    callback(null, result)
-  })
-}
-
 const queryEmail = async (email) => {
   const result = await pool.query({
     rowMode: 'object',
@@ -31,6 +13,20 @@ const registerUser = async (registerData, hashedPassword) => {
   const result = await pool.query({
     rowMode: 'object',
     text: `INSERT INTO users (firstname, lastname, email, password) VALUES ('${registerData.firstname}', '${registerData.lastname}', '${registerData.email}', '${hashedPassword}');`
+  })
+
+  if(result.rowCount == 1){
+    return true
+  }else{
+    return false
+  }
+  
+}
+
+const registerWallet = async (id) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `INSERT INTO wallet (balance, user_id) VALUES (10000, '${id}');`
   })
 
   if(result.rowCount == 1){
@@ -56,4 +52,4 @@ const queryAccount = async (email) => {
 }
 
 
-module.exports = {queryLoginUser, queryUsers, queryEmail, registerUser, queryAccount}
+module.exports = {queryEmail, registerUser, queryAccount, registerWallet}

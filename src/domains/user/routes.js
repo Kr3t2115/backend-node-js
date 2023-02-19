@@ -1,40 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const {queryLoginUser, queryEmail, registerUser, queryAccount} = require('./queries');
-const {validateRegister, checkPassword, hashPassword, generateJWT, validateLogin, comparePassword} = require('./controller');
-
-function authenticateToken(req, res, next) {
-  const token = req.cookies.token;
-  if (token == null) return res.sendStatus(401)
-
-  jwt.verify(token, process.env.ACCESS_KEY, (err, user) => {
-    if (err) 
-      return res.sendStatus(403)
-
-    req.user = user
-
-    next()
-  })
-}
-
-router.get("/ping", authenticateToken, (req, res) => {
-  res.status(200).json({"response": "pong"})
-})
-
-router.get("/logout", authenticateToken, (req, res) => {
-  res.clearCookie('token')
-  res.json({"logout": "wylogowano"})
-})
+const {queryEmail, registerUser, queryAccount, registerWallet} = require('./queries');
+const {validateRegister, hashPassword, generateJWT, validateLogin, comparePassword} = require('./controller');
 
 router.post("/login", async (req, res) => {
-
-  const loginData = {
-    email: req.body.email.toLowerCase(),
-    password: req.body.password
-  }
-
   try {
+    const loginData = {
+      email: req.body.email.toLowerCase(),
+      password: req.body.password
+    }
+
     const validateError = validateLogin(loginData)
     if (validateError){
       res.status(400).json({
@@ -57,7 +32,7 @@ router.post("/login", async (req, res) => {
     const isPasswordValid = comparePassword(req.body.password, doesAccountExists.password)
     
     if(isPasswordValid){
-      const token = generateJWT(loginData.email);
+      const token = generateJWT(loginData.email, doesAccountExists.id);
       res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)})
       res.status(200).json({
         "success_message": "Login success",
@@ -79,7 +54,6 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
-
     const registerData = {
       "firstname": req.body.firstname,
       "lastname": req.body.lastname,
@@ -110,7 +84,19 @@ router.post("/register", async (req, res) => {
     const registerPassed = registerUser(registerData, hashedPassword)
 
     if(registerPassed){
-      const token = generateJWT(registerData.email);
+      const userData = await queryAccount(registerData.email)
+
+      const isWalletRegister = await registerWallet(userData.id)
+
+      if(!isWalletRegister){
+        res.status(500).json({
+          "error_message": "There was a problem with adding the wallet to the system",
+          "error_code": 123
+        })
+        return;
+      }
+
+      const token = generateJWT(registerData.email, userData.id);
       res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)})
       res.status(200).json({
         "success_message": "The account has been successfully registered",
