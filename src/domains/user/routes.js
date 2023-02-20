@@ -3,13 +3,17 @@ const router = express.Router();
 const {queryEmail, registerUser, queryAccount, registerWallet} = require('./queries');
 const {validateRegister, hashPassword, generateJWT, validateLogin, comparePassword} = require('./controller');
 
+// login user route, returns jwt token as http token
 router.post("/login", async (req, res) => {
   try {
+
+    // declare object with data from request
     const loginData = {
       email: req.body.email.toLowerCase(),
       password: req.body.password
     }
 
+    // function that validate login data, returns error code if validation rejected, or false if validation passed
     const validateError = validateLogin(loginData)
     if (validateError){
       res.status(400).json({
@@ -19,8 +23,8 @@ router.post("/login", async (req, res) => {
       return;
     }
 
+    // function that checks if the entered email is in the database, returns false if email not found, else returns user information
     const doesAccountExists = await queryAccount(loginData.email)
-
     if(!doesAccountExists){
       res.status(404).json({
         "error_message": "We cant find account with that email",
@@ -29,10 +33,11 @@ router.post("/login", async (req, res) => {
       return;
     }
     
+    // function that compares the entered password with the user's password in the database, returns true if the passwords match, else return false
     const isPasswordValid = comparePassword(req.body.password, doesAccountExists.password)
     
     if(isPasswordValid){
-      const token = generateJWT(loginData.email, doesAccountExists.id);
+      const token = generateJWT(loginData.email, doesAccountExists.id); // functian that returns jwt token
       res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)})
       res.status(200).json({
         "success_message": "Login success",

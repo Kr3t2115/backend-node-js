@@ -46,6 +46,7 @@ const validateLogin = (loginData) => {
     }else if(!emailRegex.test(loginData.email)){
       return 152;
   }
+  return false;
 }
 
 const comparePassword = (password, hashedPassword) => {
