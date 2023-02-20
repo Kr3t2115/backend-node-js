@@ -11,13 +11,13 @@ router.get("/balance", async (req, res) => {
     res.status(404).json({
       "error_message": "There was no known issue, no wallet was found for this account",
       "error_code": 101
-    })
+    });
     return;
   }
 
   res.status(200).json({
-    "currentBalance": walletInfo.balance
-  })
-})
+    "currentBalance": walletInfo
+  });
+});
 
-module.exports = router
+module.exports = router;
