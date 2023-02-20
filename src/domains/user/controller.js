@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+// function responsible for data validation, accepts an object containing data from the request, if error returns error code
 const validateRegister = (registerData) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -13,8 +14,11 @@ const validateRegister = (registerData) => {
       }else if(!emailRegex.test(registerData.email)){
         return 103;
       }
+
+    return false;
 }
 
+//function responsible for hashing the password with bcrypt
 const hashPassword = (password) => {
     const salt = bcrypt.genSaltSync(10);
 
@@ -23,6 +27,7 @@ const hashPassword = (password) => {
     return hash;
 }
 
+// function generating the jwt token, accept email and id, returns a token
 const generateJWT = (email, id) => {
   const token = jwt.sign({
     'email': email,
@@ -32,10 +37,11 @@ const generateJWT = (email, id) => {
   {
     expiresIn: '12h'
   })
+
   return token;
-  
 }
 
+// login data validation function, accepts an object with login data, returns an error code
 const validateLogin = (loginData) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -46,9 +52,11 @@ const validateLogin = (loginData) => {
     }else if(!emailRegex.test(loginData.email)){
       return 152;
   }
+  
   return false;
 }
 
+// function that compares password to password hash, takes password and hashed password
 const comparePassword = (password, hashedPassword) => {
     if (bcrypt.compareSync(password, hashedPassword)) {
         return true;
@@ -56,6 +64,5 @@ const comparePassword = (password, hashedPassword) => {
         return false;
       }
 }
-
 
 module.exports = { validateRegister, hashPassword, generateJWT, validateLogin, comparePassword }

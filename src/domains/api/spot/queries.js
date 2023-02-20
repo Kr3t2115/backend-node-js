@@ -1,19 +1,6 @@
 const pool = require('../../../config/db')
 
-const queryCryptoBalance = async (id) => {
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `SELECT * FROM wallet WHERE user_id='${id}';`
-  })
-
-  if(result.rowCount == 1){
-    return result.rows[0].spotbalance;
-  }else{
-    return false
-  }
-  
-}
-
+// query returning account wallet informations
 const queryUserBalance = async (id) => {
   const result = await pool.query({
     rowMode: 'object',
@@ -28,6 +15,7 @@ const queryUserBalance = async (id) => {
   
 }
 
+// query that returns the prices of the pair given in the parameter
 const queryPairPrice = async(pair) => {
   const result = await pool.query({
     rowMode: 'object',
@@ -41,6 +29,7 @@ const queryPairPrice = async(pair) => {
   }
 }
 
+// query updating the user's wallet
 const updateWallet = async(newAccountBalance, newCryptoBalance, user_id) => {
   const result = await pool.query({
     rowMode: 'object',
@@ -48,10 +37,10 @@ const updateWallet = async(newAccountBalance, newCryptoBalance, user_id) => {
   })
 
   if(result.rowCount == 1){
-    return result.rows[0];
+    return result.rowCount;
   }else{
     return false
   }
 }
 
-module.exports = {queryCryptoBalance, queryUserBalance, queryPairPrice, updateWallet};
+module.exports = {queryUserBalance, queryPairPrice, updateWallet};
