@@ -14,6 +14,15 @@ router.get("/balance", async (req, res) => {
   );
 });
 
+// user spot balance route, returns the current spot account balance for requested pair
+router.get("/balance/:pair", async (req, res) => {
+  const cryptoBalance = await queryUserBalance(req.user.id);
+
+  res.status(200).json({
+    [req.params.pair]: cryptoBalance.spotbalance[req.params.pair]
+  });
+});
+
 // buying cryptocurrency route, takes the name of the pair as an argument
 router.post("/market/buy/:pair", async (req, res) => {
   try {
