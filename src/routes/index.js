@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const cors = require('cors');
 
 const apiRoutes = require("../domains/api/routes");
 const userRoutes = require("../domains/user/routes");
