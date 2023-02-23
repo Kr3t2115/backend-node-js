@@ -1,10 +1,10 @@
 const pool = require('../../../config/db');
 
 // query returning account wallet informations
-const queryUserBalance = async (id) => {
+const queryUserBalance = async (user_id) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `SELECT * FROM wallet WHERE user_id='${id}';`
+    text: `SELECT * FROM wallet WHERE user_id='${user_id}';`
   });
 
   if(result.rowCount == 1){
@@ -43,4 +43,69 @@ const updateWallet = async(newAccountBalance, newCryptoBalance, user_id) => {
   }
 }
 
-module.exports = {queryUserBalance, queryPairPrice, updateWallet};
+const insertPosition = async(pair, quantity, purchase_price, user_id) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `INSERT INTO spot_positions (pair, quantity, purchase_price, user_id) VALUES ('${pair}', '${quantity}', ${purchase_price}, '${user_id}');`
+  });
+
+  if(result.rowCount == 1){
+    return result.rowCount;
+  }else{
+    return false;
+  }
+}
+
+const deletePosition = async(pair, user_id) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `DELETE FROM spot_positions WHERE pair='${pair}' AND user_id = '${user_id}';`
+  });
+
+  if(result.rowCount == 1){
+    return result.rowCount;
+  }else{
+    return false;
+  }
+}
+
+const updatePosition = async(quantity, purchase_price, pair, user_id) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `UPDATE spot_positions SET quantity='${quantity}', purchase_price='${purchase_price}' WHERE pair='${pair}' AND user_id='${user_id}';`
+  });
+
+  if(result.rowCount == 1){
+    return result.rowCount;
+  }else{
+    return false;
+  }
+}
+
+const queryPostition = async(pair, user_id) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `SELECT * FROM spot_positions WHERE pair='${pair}' AND user_id='${user_id}';`
+  });
+
+  if(result.rowCount == 1){
+    return result.rows[0];
+  }else{
+    return false;
+  }
+}
+
+const insertHistoricTrade = async(pair, quantity, purchase_price, selling_price, user_id) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `INSERT INTO spot_history (pair, quantity, purchase_price, selling_price, user_id) VALUES ('${pair}', '${quantity}', ${purchase_price}, '${selling_price}', '${user_id}');`
+  });
+
+  if(result.rowCount == 1){
+    return result.rowCount;
+  }else{
+    return false;
+  }
+}
+
+module.exports = {queryUserBalance, queryPairPrice, updateWallet, insertPosition, queryPostition, deletePosition, updatePosition, insertHistoricTrade};

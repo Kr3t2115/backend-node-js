@@ -8,7 +8,7 @@ const queryBalance = async (id) => {
   });
 
   if(result.rowCount == 1){
-    return result.rows[0].balance;
+    return result.rows[0];
   }else{
     return false;
   }
