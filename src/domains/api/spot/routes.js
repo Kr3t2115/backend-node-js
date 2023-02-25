@@ -1,7 +1,9 @@
 const express = require("express");
-const { decimalPlaces, numberOfDecimalPlaces, priceAveraging } = require("./controller");
+const {  numberOfDecimalPlaces, priceAveraging } = require("./controller");
+const { handleWebSocket } = require('./positions/positions');
 const {queryUserBalance, queryPairPrice, updateWallet, insertPosition, queryPostition, deletePosition, updatePosition, insertHistoricTrade} = require("./queries");
 const router = express.Router();
+const positions = require('./positions/positions')
 
 // declaration of cryptocurrency pairs that are accepted
 const spotPairs = ["ETHUSDT", "BTCUSDT"];
@@ -222,5 +224,6 @@ router.post("/market/sell/:pair", async (req, res) => {
   }
 });
 
+router.use('/positions', positions)
 
 module.exports = router;
