@@ -1,14 +1,15 @@
 const pool = require('../../../config/db');
 
-// query returning account wallet informations
-const querySpotPositions = async (user_id) => {
+// query returning user opened positions
+const querySpotPositions = async (user_id, pair) => {
+
   const result = await pool.query({
     rowMode: 'object',
-    text: `SELECT * FROM spot_positions WHERE user_id='${user_id}';` 
+    text: `SELECT * FROM spot_positions WHERE user_id='${user_id}'` + (pair ? ` AND pair = '${pair}'` : ``) 
   });
 
-  if(result.rowCount == 1){
-    return result.rows[0];
+  if(result.rows){
+    return result.rows;
   }else{
     return false;
   }
