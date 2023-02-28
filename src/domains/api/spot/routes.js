@@ -1,5 +1,6 @@
 const express = require("express");
-const {numberOfDecimalPlaces, priceAveraging} = require("./controller");
+const numberOfDecimalPlaces = require('../../../util/numberOfDecimalPlaces')
+const {priceAveraging} = require("./controller");
 const {queryUserBalance, queryPairPrice, updateWallet, insertPosition, queryPostition, deletePosition, updatePosition, insertHistoricTrade} = require("./queries");
 const router = express.Router();
 

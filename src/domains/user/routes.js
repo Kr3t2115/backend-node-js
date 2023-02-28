@@ -38,7 +38,7 @@ router.post("/login", async (req, res) => {
     
     if(passwordMatch){
       const token = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
-      res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000), sameSite: 'none', secure: true});
+      res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)});
       res.status(200).json({
         "success_message": "Login success",
         "success_code": 132,
