@@ -28,4 +28,17 @@ const queryUserBalance = async (user_id) => {
   } 
 }
 
+const insertPosition = async(pair, quantity, purchase_price, user_id) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `INSERT INTO futures_positions (pair, type, quantity, leverage, purchase_price, takeprofit, stoploss, user_id) VALUES ('${pair}', '${quantity}', ${purchase_price}, '${user_id}');`
+  });
+
+  if(result.rowCount == 1){
+    return result.rowCount;
+  }
+
+ return false;  
+}
+
 module.exports = {queryPairPrice, queryUserBalance}

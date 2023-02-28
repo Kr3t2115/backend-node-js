@@ -18,19 +18,36 @@ router.post("/market/open/:pair", async(req, res) => {
     leverage: req.body.leverage || 1
   }
 
-  const validatedData = validateData(data);
+  const validateError = validateData(data);
 
-  if(validatedData){
+  if(validateError){
     res.status(404).json({
       "error_message": "There was a problem with validation",
-      "error_code": validatedData
+      "error_code": validateError
     });
     return;
   }
 
-  const pairPrice = await queryPairPrice(data.pair)
+  // function that returns the current price of the pair
+  const pairPrice = await queryPairPrice(data.pair);
+  if (!pairPrice){
+    res.status(404).json({
+      "error_message": "There is a problem with the specified cryptocurrency pair",
+      "error_code": 999
+    });
+    return;
+  }
+
   const wallet = await queryUserBalance(req.user.id)
   
+  if (!wallet){
+    res.status(404).json({
+      "error_message": "There is a problem with the specified cryptocurrency pair",
+      "error_code": 999
+    });
+    return;
+  }
+
   if(wallet.balance < pairPrice * data.quantity){
     res.status(404).json({
       "error_message": "There was a problem with validation",
@@ -40,9 +57,7 @@ router.post("/market/open/:pair", async(req, res) => {
   }
 
   
-
-  console.log(validatedData);
-
+  
   res.status(200).json({
     data
   });
