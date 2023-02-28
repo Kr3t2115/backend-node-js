@@ -16,7 +16,8 @@ router.get("/balance", async (req, res) => {
   }
 
   res.status(200).json({
-    "currentBalance": walletInfo
+    "currentBalance": walletInfo.balance,
+    "spotbalance": walletInfo.spotbalance
   });
 });
 
