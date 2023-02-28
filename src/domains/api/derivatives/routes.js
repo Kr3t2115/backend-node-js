@@ -1,6 +1,6 @@
 const express = require("express");
 const { validateData } = require("./controller");
-const { queryPairPrice } = require("./queries");
+const { queryPairPrice, queryUserBalance } = require("./queries");
 const router = express.Router();
 
 // funny ping pong answer function
@@ -15,7 +15,7 @@ router.post("/market/open/:pair", async(req, res) => {
     // optional
     takeProfit: req.body.takeProfit,
     stopLoss: req.body.stopLoss,
-    laverage: req.body.laverage || 1
+    leverage: req.body.leverage || 1
   }
 
   const validatedData = validateData(data);
@@ -29,6 +29,17 @@ router.post("/market/open/:pair", async(req, res) => {
   }
 
   const pairPrice = await queryPairPrice(data.pair)
+  const wallet = await queryUserBalance(req.user.id)
+  
+  if(wallet.balance < pairPrice * data.quantity){
+    res.status(404).json({
+      "error_message": "There was a problem with validation",
+      "error_code": 1001
+    });
+    return;
+  }
+
+  
 
   console.log(validatedData);
 

@@ -1,3 +1,5 @@
+const pool = require('../../../config/db')
+
 // query that returns the prices of the pair given in the parameter
 const queryPairPrice = async(pair) => {
   const result = await pool.query({
@@ -26,4 +28,4 @@ const queryUserBalance = async (user_id) => {
   } 
 }
 
-module.exports = {queryPairPrice}
+module.exports = {queryPairPrice, queryUserBalance}

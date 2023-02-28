@@ -51,9 +51,9 @@ const insertPosition = async(pair, quantity, purchase_price, user_id) => {
 
   if(result.rowCount == 1){
     return result.rowCount;
-  }else{
-    return false;
   }
+
+ return false;  
 }
 
 const deletePosition = async(pair, user_id) => {
@@ -64,9 +64,9 @@ const deletePosition = async(pair, user_id) => {
 
   if(result.rowCount == 1){
     return result.rowCount;
-  }else{
-    return false;
   }
+
+  return false;
 }
 
 const updatePosition = async(quantity, purchase_price, pair, user_id) => {
