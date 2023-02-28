@@ -18,9 +18,9 @@ router.get("/balance", async (req, res) => {
 router.get("/balance/:pair", async (req, res) => {
   const cryptoBalance = await queryUserBalance(req.user.id);
 
-  res.status(200).json(
-    cryptoBalance.spotbalance[req.params.pair]
-  );
+  res.status(200).json({
+    [req.params.pair]: cryptoBalance.spotbalance[req.params.pair]
+  });
 });
 
 // buying cryptocurrency route, takes the name of the pair as an argument
