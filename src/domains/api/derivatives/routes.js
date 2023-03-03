@@ -63,7 +63,7 @@ router.post("/market/open/:pair", async(req, res) => {
       "error_message": "There was a problem with validation",
       "error_code": 1001
     });
-    return;
+    return; 
   }
 
   res.status(200).json({
