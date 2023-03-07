@@ -57,7 +57,7 @@ router.post("/market/open/:pair", async(req, res) => {
     return;
   }
 
-  const liquidationPrice = pairPrice * data.quantity - pairPrice * data.quantity / data.leverage
+  const liquidationPrice = pairPrice * data.quantity - pairPrice * data.quantity / data.leverage;
 
   const newAccountBalance = wallet.balance - pairPrice * data.quantity;
 
