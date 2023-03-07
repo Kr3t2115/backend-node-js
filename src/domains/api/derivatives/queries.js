@@ -34,7 +34,7 @@ const insertPosition = async(pair, type, quantity, leverage, purchasePrice, take
 
     await pool.query({
       rowMode: 'object',
-      text: `INSERT INTO futures_positions (pair, type, quantity, leverage, purchasePrice, takeProfit, stopLoss, \"userId\", liquidationPrice) VALUES ('${pair}', '${type}', '${quantity}', '${leverage}', '${purchasePrice}', ${takeProfit}, ${stopLoss}, '${userId}', ${liquidationPrice});`
+      text: `INSERT INTO futures_positions (pair, type, quantity, leverage, \"purchasePrice"\, \"takeProfit"\, \"stopLoss"\, \"userId\", \"liquidationPrice"\) VALUES ('${pair}', '${type}', '${quantity}', '${leverage}', '${purchasePrice}', ${takeProfit}, ${stopLoss}, '${userId}', ${liquidationPrice});`
     });
 
     await pool.query({
@@ -44,9 +44,34 @@ const insertPosition = async(pair, type, quantity, leverage, purchasePrice, take
 
     await pool.query('COMMIT');
   } catch (error) {
+    console.log(error)
     return false;
   }
   return true;
 }
 
-module.exports = {queryPairPrice, queryUserBalance, insertPosition}
+const updatePosition = async() => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO futures_positions (pair, type, quantity, leverage, \"purchasePrice"\, \"takeProfit"\, \"stopLoss"\, \"userId\", \"liquidationPrice"\) VALUES ('${pair}', '${type}', '${quantity}', '${leverage}', '${purchasePrice}', ${takeProfit}, ${stopLoss}, '${userId}', ${liquidationPrice});`
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet SET balance='${newAccountBalance}', \"futureBalance\"='${newFutureBalance}' WHERE \"userId\"='${userId}';`
+    });
+
+    await pool.query('COMMIT');
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+  return true;
+}
+
+const queryPosition = 
+
+module.exports = {queryPairPrice, queryUserBalance, insertPosition, updatePosition}

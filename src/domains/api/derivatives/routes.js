@@ -57,28 +57,27 @@ router.post("/market/open/:pair", async(req, res) => {
     return;
   }
 
-
-
   const liquidationPrice = pairPrice * data.quantity - pairPrice * data.quantity / data.leverage;
 
   const newAccountBalance = wallet.balance - pairPrice * data.quantity;
-
-  console.log(wallet)
 
   let newFutureBalance = wallet.futureBalance;
   let position;
 
   if(!wallet.futureBalance?.[req.params.pair]){
     newFutureBalance = {};
-    newFutureBalance[req.params.pair] = data.quantity;
+    newFutureBalance[req.params.pair] = Number(data.quantity).toFixed(1);
     
+    console.log(newFutureBalance);
+
     // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
-    position = await insertPosition(data.pair, data.type, data.quantity, data.leverage, pairPrice, data.takeProfit, data.stopLoss, req.user.id, liquidationPrice, newAccountBalance, newFutureBalance)
+    position = await insertPosition(data.pair, data.type, data.quantity, data.leverage, pairPrice, data.takeProfit, data.stopLoss, req.user.id, liquidationPrice, newAccountBalance, JSON.stringify(newFutureBalance))
   }else{
-    newFutureBalance[req.params.pair] = data.quantity + wallet.spotBalance[req.params.pair];
+    const cryptoBalance = Number(data.quantity) + Number(wallet.spotBalance[req.params.pair]);
+    newFutureBalance[req.params.pair] = cryptoBalance.toFixed(1);
     
     // function that calculates the average purchase price of cryptocurrencies based on quantity and price
-    newAveragePrice = await priceAveraging(req, pairPrice);
+    //newAveragePrice = await priceAveraging(req, pairPrice);
 
     position = await updatePosition(newCryptocurrencyBalance[req.params.pair], newAveragePrice, req.params.pair, req.user.id);
   }
