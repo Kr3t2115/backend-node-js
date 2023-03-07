@@ -44,7 +44,7 @@ router.post("/market/open/:pair", async(req, res) => {
   if (!wallet){
     res.status(404).json({
       "error_message": "There is a problem with the specified cryptocurrency pair",
-      "error_code": 999
+      "error_code": 9991
     });
     return;
   }
@@ -57,11 +57,31 @@ router.post("/market/open/:pair", async(req, res) => {
     return;
   }
 
+
+
   const liquidationPrice = pairPrice * data.quantity - pairPrice * data.quantity / data.leverage;
 
   const newAccountBalance = wallet.balance - pairPrice * data.quantity;
 
-  const position = await insertPosition(data.pair, data.type, data.quantity, data.leverage, pairPrice, data.takeProfit, data.stopLoss, req.user.id, liquidationPrice, newAccountBalance)
+  console.log(wallet)
+
+  let newFutureBalance = wallet.futureBalance;
+  let position;
+
+  if(!wallet.futureBalance?.[req.params.pair]){
+    newFutureBalance = {};
+    newFutureBalance[req.params.pair] = data.quantity;
+    
+    // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
+    position = await insertPosition(data.pair, data.type, data.quantity, data.leverage, pairPrice, data.takeProfit, data.stopLoss, req.user.id, liquidationPrice, newAccountBalance, newFutureBalance)
+  }else{
+    newFutureBalance[req.params.pair] = data.quantity + wallet.spotBalance[req.params.pair];
+    
+    // function that calculates the average purchase price of cryptocurrencies based on quantity and price
+    newAveragePrice = await priceAveraging(req, pairPrice);
+
+    position = await updatePosition(newCryptocurrencyBalance[req.params.pair], newAveragePrice, req.params.pair, req.user.id);
+  }
 
   if(!position){
     res.status(404).json({

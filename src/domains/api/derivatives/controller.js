@@ -14,13 +14,13 @@ const validateData = (data, pairPrice) => {
     return 3;
   }
   else if(data.type != "LONG" && data.type != "SHORT"){
-    return 4
+    return 4;
   }
   else if(data.stopLoss > pairPrice){
-    return 5
+    return 5;
   }
-  else if(data.takeprofit < pairPrice){
-    return 6
+  else if(data.takeProfit && data.takeProfit < pairPrice){
+    return 6;
   }
 
   return false;
