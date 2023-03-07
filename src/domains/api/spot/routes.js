@@ -81,15 +81,14 @@ router.post("/market/buy/:pair", async (req, res) => {
     if(!userWallet.spotBalance?.[req.params.pair]){
       newCryptocurrencyBalance = {};
       newCryptocurrencyBalance[req.params.pair] = req.body.quantity;
-      
+      console.log(newCryptocurrencyBalance[req.params.pair])
       // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
       position = await insertPosition(req.params.pair, req.body.quantity, pairPrice, req.user.id);
     }else{
-      newCryptocurrencyBalance[req.params.pair] = req.body.quantity + userWallet.spotBalance[req.params.pair];
-      
+      let cryptoQuantity = Number(req.body.quantity) + Number(userWallet.spotBalance[req.params.pair]);
+      newCryptocurrencyBalance[req.params.pair] = cryptoQuantity.toFixed(1);
       // function that calculates the average purchase price of cryptocurrencies based on quantity and price
       newAveragePrice = await priceAveraging(req, pairPrice);
-
       position = await updatePosition(newCryptocurrencyBalance[req.params.pair], newAveragePrice, req.params.pair, req.user.id);
     }
 
@@ -118,6 +117,7 @@ router.post("/market/buy/:pair", async (req, res) => {
       "purchased_quantity": req.body.quantity,
       "purchase amount": pairPrice * req.body.quantity
     });
+    
   } catch (error) {
     console.log(error);
   }
@@ -168,12 +168,11 @@ router.post("/market/sell/:pair", async (req, res) => {
     const newAccountBalance = userWallet.balance + pairPrice * req.body.quantity;
     let newCryptocurrencyBalance = userWallet.spotBalance;
     
-    newCryptocurrencyBalance[req.params.pair] = pairQuantity - req.body.quantity;
+    const cryptoQuantity = Number(pairQuantity) - Number(req.body.quantity);
+    newCryptocurrencyBalance[req.params.pair] = cryptoQuantity.toFixed(1);
     
     // query from the database containing information about the contained item
     const userPosition = await queryPostition(req.params.pair, req.user.id)
-    
-    console.log(userPosition)
 
     let newPositionData;
 

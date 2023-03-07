@@ -44,6 +44,8 @@ const updateWallet = async(newAccountBalance, newCryptoBalance, userId) => {
 }
 
 const insertPosition = async(pair, quantity, purchasePrice, userId) => {
+  quantity = quantity.toFixed(1);
+
   const result = await pool.query({
     rowMode: 'object',
     text: `INSERT INTO spot_positions (pair, quantity, \"purchasePrice\", \"userId\") VALUES ('${pair}', '${quantity}', '${purchasePrice}', '${userId}');`
@@ -70,7 +72,7 @@ const deletePosition = async(pair, userId) => {
 }
 
 const updatePosition = async(quantity, purchasePrice, pair, userId) => {
-  console.log(quantity, purchasePrice, pair, userId)
+
   const result = await pool.query({
     rowMode: 'object',
     text: `UPDATE spot_positions SET quantity='${quantity}', \"purchasePrice\"='${purchasePrice}' WHERE pair='${pair}' AND \"userId\"='${userId}';`
