@@ -4,7 +4,7 @@ const pool = require('../../../config/db');
 const queryBalance = async (id) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `SELECT * FROM wallet WHERE user_id='${id}';`
+    text: `SELECT * FROM wallet WHERE \"userId\"='${id}';`
   });
 
   if(result.rowCount == 1){

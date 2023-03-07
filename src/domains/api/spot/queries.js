@@ -1,10 +1,10 @@
 const pool = require('../../../config/db');
 
 // query returning account wallet informations
-const queryUserBalance = async (user_id) => {
+const queryUserBalance = async (userId) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `SELECT * FROM wallet WHERE user_id='${user_id}';`
+    text: `SELECT * FROM wallet WHERE \"userId\"='${userId}';`
   });
 
   if(result.rowCount == 1){
@@ -19,7 +19,7 @@ const queryUserBalance = async (user_id) => {
 const queryPairPrice = async(pair) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `SELECT cryptocurrencies FROM cryptoprices WHERE id=1;`
+    text: `SELECT cryptocurrencies FROM crypto_prices WHERE id=1;`
   });
 
   if(result.rowCount == 1){
@@ -30,10 +30,10 @@ const queryPairPrice = async(pair) => {
 }
 
 // query updating the user's wallet
-const updateWallet = async(newAccountBalance, newCryptoBalance, user_id) => {
+const updateWallet = async(newAccountBalance, newCryptoBalance, userId) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `UPDATE wallet SET balance='${newAccountBalance}', spotbalance = '${newCryptoBalance}' WHERE user_id='${user_id}';`
+    text: `UPDATE wallet SET balance='${newAccountBalance}', \"spotBalance\" = '${newCryptoBalance}' WHERE \"userId\"='${userId}';`
   });
 
   if(result.rowCount == 1){
@@ -43,23 +43,23 @@ const updateWallet = async(newAccountBalance, newCryptoBalance, user_id) => {
   }
 }
 
-const insertPosition = async(pair, quantity, purchase_price, user_id) => {
+const insertPosition = async(pair, quantity, purchasePrice, userId) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `INSERT INTO spot_positions (pair, quantity, purchase_price, user_id) VALUES ('${pair}', '${quantity}', ${purchase_price}, '${user_id}');`
+    text: `INSERT INTO spot_positions (pair, quantity, \"purchasePrice\", \"userId\") VALUES ('${pair}', '${quantity}', '${purchasePrice}', '${userId}');`
   });
 
   if(result.rowCount == 1){
     return result.rowCount;
   }
 
- return false;  
+  return false;  
 }
 
-const deletePosition = async(pair, user_id) => {
+const deletePosition = async(pair, userId) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `DELETE FROM spot_positions WHERE pair='${pair}' AND user_id = '${user_id}';`
+    text: `DELETE FROM spot_positions WHERE pair='${pair}' AND \"userId\" = '${userId}';`
   });
 
   if(result.rowCount == 1){
@@ -69,12 +69,12 @@ const deletePosition = async(pair, user_id) => {
   return false;
 }
 
-const updatePosition = async(quantity, purchase_price, pair, user_id) => {
+const updatePosition = async(quantity, purchasePrice, pair, userId) => {
+  console.log(quantity, purchasePrice, pair, userId)
   const result = await pool.query({
     rowMode: 'object',
-    text: `UPDATE spot_positions SET quantity='${quantity}', purchase_price='${purchase_price}' WHERE pair='${pair}' AND user_id='${user_id}';`
+    text: `UPDATE spot_positions SET quantity='${quantity}', \"purchasePrice\"='${purchasePrice}' WHERE pair='${pair}' AND \"userId\"='${userId}';`
   });
-
   if(result.rowCount == 1){
     return result.rowCount;
   }else{
@@ -82,10 +82,10 @@ const updatePosition = async(quantity, purchase_price, pair, user_id) => {
   }
 }
 
-const queryPostition = async(pair, user_id) => {
+const queryPostition = async(pair, userId) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `SELECT * FROM spot_positions WHERE pair='${pair}' AND user_id='${user_id}';`
+    text: `SELECT * FROM spot_positions WHERE pair='${pair}' AND \"userId\"='${userId}';`
   });
 
   if(result.rowCount == 1){
@@ -95,10 +95,10 @@ const queryPostition = async(pair, user_id) => {
   }
 }
 
-const insertHistoricTrade = async(pair, quantity, purchase_price, selling_price, user_id) => {
+const insertHistoricTrade = async(pair, quantity, purchasePrice, selling_price, userId) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `INSERT INTO spot_history (pair, quantity, purchase_price, selling_price, user_id) VALUES ('${pair}', '${quantity}', ${purchase_price}, '${selling_price}', '${user_id}');`
+    text: `INSERT INTO spot_history (pair, quantity, \"purchasePrice\", \"sellingPrice\", \"userId\") VALUES ('${pair}', '${quantity}', ${purchasePrice}, '${selling_price}', '${userId}');`
   });
 
   if(result.rowCount == 1){

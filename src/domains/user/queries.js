@@ -32,7 +32,7 @@ const registerUser = async (registerData, hashedPassword) => {
 const registerWallet = async (id) => {
   const result = await pool.query({
     rowMode: 'object',
-    text: `INSERT INTO wallet (balance, user_id) VALUES (10000, '${id}');`
+    text: `INSERT INTO wallet (balance, \"userId\") VALUES (10000, '${id}');`
   });
 
   if(result.rowCount == 1){

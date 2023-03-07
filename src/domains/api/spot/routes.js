@@ -12,7 +12,7 @@ router.get("/balance", async (req, res) => {
   const cryptoBalance = await queryUserBalance(req.user.id);
 
   res.status(200).json(
-    cryptoBalance.spotbalance
+    cryptoBalance.spotBalance
   );
 });
 
@@ -21,7 +21,7 @@ router.get("/balance/:pair", async (req, res) => {
   const cryptoBalance = await queryUserBalance(req.user.id);
   
   res.status(200).json({
-    [req.params.pair]: cryptoBalance.spotbalance[req.params.pair]
+    [req.params.pair]: cryptoBalance.spotBalance[req.params.pair]
   });
 });
 
@@ -73,19 +73,19 @@ router.post("/market/buy/:pair", async (req, res) => {
 
     // calculation of a new account balance, and declaration of a cryptocurrency balance object
     const newAccountBalance = userWallet.balance - pairPrice * req.body.quantity;
-    let newCryptocurrencyBalance = userWallet.spotbalance;
+    let newCryptocurrencyBalance = userWallet.spotBalance;
 
     let position;
 
     // conditional statement checks if this account has any cryptocurrencies in the spot account, on this basis it creates a new object
-    if(!userWallet.spotbalance?.[req.params.pair]){
+    if(!userWallet.spotBalance?.[req.params.pair]){
       newCryptocurrencyBalance = {};
       newCryptocurrencyBalance[req.params.pair] = req.body.quantity;
       
       // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
       position = await insertPosition(req.params.pair, req.body.quantity, pairPrice, req.user.id);
     }else{
-      newCryptocurrencyBalance[req.params.pair] = req.body.quantity + userWallet.spotbalance[req.params.pair];
+      newCryptocurrencyBalance[req.params.pair] = req.body.quantity + userWallet.spotBalance[req.params.pair];
       
       // function that calculates the average purchase price of cryptocurrencies based on quantity and price
       newAveragePrice = await priceAveraging(req, pairPrice);
@@ -151,9 +151,9 @@ router.post("/market/sell/:pair", async (req, res) => {
     const userWallet = await queryUserBalance(req.user.id);
 
     // declaring the amount of purchased cryptocurrencies, because the subsequent reference of the object prevents us from reading this value
-    const pairQuantity = userWallet.spotbalance[req.params.pair];
+    const pairQuantity = userWallet.spotBalance[req.params.pair];
 
-    if(!userWallet.spotbalance?.[req.params.pair] || pairQuantity < req.body.quantity){
+    if(!userWallet.spotBalance?.[req.params.pair] || pairQuantity < req.body.quantity){
       res.status(404).json({
         "error_message": "You do not own as much cryptocurrency as you want to sell.",
         "error_code": 999
@@ -166,20 +166,22 @@ router.post("/market/sell/:pair", async (req, res) => {
     
     // calculation of a new account balance, and declaration of a cryptocurrency balance object
     const newAccountBalance = userWallet.balance + pairPrice * req.body.quantity;
-    let newCryptocurrencyBalance = userWallet.spotbalance;
+    let newCryptocurrencyBalance = userWallet.spotBalance;
     
     newCryptocurrencyBalance[req.params.pair] = pairQuantity - req.body.quantity;
     
     // query from the database containing information about the contained item
     const userPosition = await queryPostition(req.params.pair, req.user.id)
     
+    console.log(userPosition)
+
     let newPositionData;
 
     // check whether position should be deleted or reduced
     if (req.body.quantity == pairQuantity) {
       newPositionData = await deletePosition(req.params.pair, req.user.id);
     } else {
-      newPositionData = await updatePosition(newCryptocurrencyBalance[req.params.pair], userPosition.purchase_price, req.params.pair, req.user.id);
+      newPositionData = await updatePosition(newCryptocurrencyBalance[req.params.pair], userPosition.purchasePrice, req.params.pair, req.user.id);
     }
 
     if(!newPositionData){
@@ -191,7 +193,7 @@ router.post("/market/sell/:pair", async (req, res) => {
     }
 
     // adding a trade to history
-    const newTradeHistory = await insertHistoricTrade(req.params.pair, req.body.quantity, userPosition.purchase_price, pairPrice, req.user.id);
+    const newTradeHistory = await insertHistoricTrade(req.params.pair, req.body.quantity, userPosition.purchasePrice, pairPrice, req.user.id);
 
     if(!newTradeHistory){
       res.status(404).json({
