@@ -78,34 +78,23 @@ router.post("/market/buy/:pair", async (req, res) => {
     let position;
 
     // conditional statement checks if this account has any cryptocurrencies in the spot account, on this basis it creates a new object
-    if(!userWallet.spotBalance?.[req.params.pair]){
+    if(!userWallet.spotBalance?.[req.params.pair] || userWallet.spotBalance?.[req.params.pair] == 0){
       newCryptocurrencyBalance = {};
       newCryptocurrencyBalance[req.params.pair] = req.body.quantity;
       console.log(newCryptocurrencyBalance[req.params.pair])
       // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
-      position = await insertPosition(req.params.pair, req.body.quantity, pairPrice, req.user.id);
+      position = await insertPosition(req.params.pair, req.body.quantity, pairPrice, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance));
     }else{
       let cryptoQuantity = Number(req.body.quantity) + Number(userWallet.spotBalance[req.params.pair]);
       newCryptocurrencyBalance[req.params.pair] = cryptoQuantity.toFixed(1);
       // function that calculates the average purchase price of cryptocurrencies based on quantity and price
       newAveragePrice = await priceAveraging(req, pairPrice);
-      position = await updatePosition(newCryptocurrencyBalance[req.params.pair], newAveragePrice, req.params.pair, req.user.id);
+      position = await updatePosition(newCryptocurrencyBalance[req.params.pair], newAveragePrice, req.params.pair, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance));
     }
 
     if(!position){
       res.status(404).json({
         "error_message": "There was a problem with adding your position",
-        "error_code": 999
-      });
-      return;
-    }
-
-    // function that updates the state of the user's wallet, accept new account balance, new crypto balance and user id
-    const walletUpdated = await updateWallet(newAccountBalance, JSON.stringify(newCryptocurrencyBalance), req.user.id);
-
-    if(!walletUpdated){
-      res.status(404).json({
-        "error_message": "There was a problem updating your wallet",
         "error_code": 999
       });
       return;

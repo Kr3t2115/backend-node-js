@@ -8,7 +8,7 @@ const priceAveraging = async (req, pairPrice) => {
   const newQuantity = currentQuantity + req.body.quantity;
   const newTotalPrice = currentTotalPrice + pairPrice * req.body.quantity;
   const averagePrice = newTotalPrice / newQuantity;
-
+  console.log(req.params.pair, req.user.id)
   return averagePrice;
 }
 
