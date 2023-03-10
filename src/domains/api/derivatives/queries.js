@@ -72,6 +72,39 @@ const updatePosition = async() => {
   return true;
 }
 
-const queryPosition = 
+const queryPosition = async(id, userId) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `SELECT * FROM futures_positions WHERE \"userId\"='${userId}' AND id='${id}';`
+  });
 
-module.exports = {queryPairPrice, queryUserBalance, insertPosition, updatePosition}
+  if(result.rowCount == 1){
+    return result.rows[0];
+  }else{
+    return false;
+  } 
+}
+
+const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM futures_positions WHERE id='${id}' AND \"userId\" = '${userId}';`
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet SET balance='${newAccountBalance}', \"futureBalance\"='${newFutureBalance}' WHERE \"userId\"='${userId}';`
+    });
+
+    await pool.query('COMMIT');
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+  return true;
+}
+
+module.exports = {queryPairPrice, queryUserBalance, insertPosition, updatePosition, queryPosition, deletePosition}

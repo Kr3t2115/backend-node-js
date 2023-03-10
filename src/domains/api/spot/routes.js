@@ -81,14 +81,17 @@ router.post("/market/buy/:pair", async (req, res) => {
     if(!userWallet.spotBalance?.[req.params.pair] || userWallet.spotBalance?.[req.params.pair] == 0){
       newCryptocurrencyBalance = {};
       newCryptocurrencyBalance[req.params.pair] = req.body.quantity;
-      console.log(newCryptocurrencyBalance[req.params.pair])
+
       // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
       position = await insertPosition(req.params.pair, req.body.quantity, pairPrice, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance));
     }else{
       let cryptoQuantity = Number(req.body.quantity) + Number(userWallet.spotBalance[req.params.pair]);
+
       newCryptocurrencyBalance[req.params.pair] = cryptoQuantity.toFixed(1);
+
       // function that calculates the average purchase price of cryptocurrencies based on quantity and price
       newAveragePrice = await priceAveraging(req, pairPrice);
+      
       position = await updatePosition(newCryptocurrencyBalance[req.params.pair], newAveragePrice, req.params.pair, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance));
     }
 
