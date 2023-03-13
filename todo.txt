@@ -1,6 +1,5 @@
 * Posprzątąć kod SPOT
 * Dodać kupowanie spot limit
 
-Dodać walidacje czy quantity nie jest liczbą ujemną futures i spot;
-
-nie uśredniamy pozycji!
+Dodanie że TP i SL mogą mieć 3 cyfry po przecinku.
+źle liczona jest likwidacja

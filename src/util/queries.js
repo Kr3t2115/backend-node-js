@@ -11,9 +11,28 @@ const queryCryptoPrices = async (updatedPrices) => {
   }else{
     return false
   }
+}
+
+const queryLiquidation = async (pair, price) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * FROM futures_positions WHERE pair='${pair}' 
+      AND (type='LONG' AND(\"stopLoss\" >= ${price} OR \"takeProfit\" <= ${price} OR \"liquidationPrice\" >= ${price})) 
+      OR (type='SHORT' AND(\"stopLoss\" <= ${price} OR \"takeProfit\" >= ${price} OR \"liquidationPrice\" <= ${price}))`
+    })
+  
+    if(result.rowCount){
+      return result.rows;
+    }else{
+      return false
+    }
+  } catch (error) {
+    console.log(error)
+  }
   
 }
 
 
 
-module.exports = {queryCryptoPrices};
+module.exports = {queryCryptoPrices, queryLiquidation};

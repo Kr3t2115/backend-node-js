@@ -107,4 +107,17 @@ const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) =>
   return true;
 }
 
-module.exports = {queryPairPrice, queryUserBalance, insertPosition, updatePosition, queryPosition, deletePosition}
+const updateTPSL = async(takeProfit, stopLoss, id, userId) => {
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `UPDATE futures_positions SET \"takeProfit"\=${takeProfit}, \"stopLoss\"=${stopLoss} WHERE id=${id} AND \"userId\"='${userId}';`
+  });
+
+  if(result.rowCount == 1){
+    return true;
+  }else{
+    return false;
+  } 
+}
+
+module.exports = {queryPairPrice, queryUserBalance, insertPosition, updatePosition, queryPosition, deletePosition, updateTPSL}

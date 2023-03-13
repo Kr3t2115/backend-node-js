@@ -1,6 +1,6 @@
 const express = require("express");
 const { validateData } = require("./controller");
-const { queryPairPrice, queryUserBalance, insertPosition, queryPosition, deletePosition, updatePosition } = require("./queries");
+const { queryPairPrice, queryUserBalance, insertPosition, queryPosition, deletePosition, updatePosition, updateTPSL } = require("./queries");
 const numberOfDecimalPlaces = require('../../../util/numberOfDecimalPlaces');
 const router = express.Router();
 
@@ -57,7 +57,7 @@ router.post("/market/open/:pair", async(req, res) => {
     return;
   }
 
-  const liquidationPrice = pairPrice * data.quantity - pairPrice * data.quantity / data.leverage;
+  const liquidationPrice = pairPrice - pairPrice / data.leverage;
 
   const newAccountBalance = wallet.balance - pairPrice * data.quantity;
 
@@ -67,8 +67,6 @@ router.post("/market/open/:pair", async(req, res) => {
   if(!wallet.futureBalance?.[req.params.pair] || wallet.futureBalance?.[req.params.pair] == 0){
     newFutureBalance = {};
     newFutureBalance[req.params.pair] = Number(data.quantity).toFixed(1);
-    
-    console.log(newFutureBalance);
 
     // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
     position = await insertPosition(data.pair, data.type, data.quantity, data.leverage, pairPrice, data.takeProfit, data.stopLoss, req.user.id, liquidationPrice, newAccountBalance, JSON.stringify(newFutureBalance))
@@ -172,8 +170,7 @@ router.post("/market/close/:id", async(req, res) => {
 
       updateBalance = await updatePosition(quantity, req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance))
     }
-
-    
+   
     if(!updateBalance){
       res.status(404).json({
         "error_message": "There was a problem with validation",
@@ -190,56 +187,65 @@ router.post("/market/close/:id", async(req, res) => {
   }
 });
 
-router.post("/market/close/part/:id", async(req, res) => {
+router.post("/position/update/:id", async(req, res) => {
   try {
-    
-    const decimalPlaces = numberOfDecimalPlaces(req.body.quantity)
-
-    if(!req.body.quantity || decimalPlaces > 1 || req.body.quantity < 0){
-      res.status(404).json({
-        "error_message": "There was a problem with validation",
-        "error_code": 100121
-      });
-      return; 
+  
+    const data = {
+      takeProfit: req.body.takeProfit || null,
+      stopLoss: req.body.stopLoss || null
     }
 
     const position = await queryPosition(req.params.id, req.user.id);
-
-    if(!position){
-      res.status(404).json({
-        "error_message": "There was a problem with validation",
-        "error_code": 100121
-      });
-      return; 
-    }
-
     const pairPrice = await queryPairPrice(position.pair);
 
-    if(!pairPrice){
+    // wrzuc to do kontrolera pozniej
+    if(position.type == "LONG"){
+
+      if(data.takeProfit <= pairPrice && data.takeProfit !== null){
+        res.status(404).json({
+          "error_message": "There was a problem with validation",
+          "error_code": 10
+        });
+        return; 
+      }else if(data.stopLoss >= pairPrice && data.stopLoss !== null){
+        res.status(404).json({
+          "error_message": "There was a problem with validation",
+          "error_code": 11
+        });
+        return; 
+      }
+
+    }else{
+
+      if(data.takeProfit >= pairPrice && data.takeProfit !== null){
+        res.status(404).json({
+          "error_message": "There was a problem with validation",
+          "error_code": 12
+        });
+        return; 
+      }else if(data.stopLoss <= pairPrice && data.stopLoss !== null){
+        res.status(404).json({
+          "error_message": "There was a problem with validation",
+          "error_code": 13
+        });
+        return; 
+      }
+    }
+
+    const updatePosition = await updateTPSL(data.takeProfit, data.stopLoss, req.params.id, req.user.id);
+
+    if(!updatePosition){
       res.status(404).json({
         "error_message": "There was a problem with validation",
-        "error_code": 100125
+        "error_code": 14
       });
       return; 
     }
 
-    const wallet = await queryUserBalance(req.user.id)
-    
-    if(!wallet){
-      res.status(404).json({
-        "error_message": "There was a problem with validation",
-        "error_code": 100124
-      });
-      return; 
-    }
-
-
-
-    res.status(200).send('lol');
-
+    res.send(pairPrice)
   } catch (error) {
     console.log(error);
-    res.status(404).send('erorr');
+    res.status(404).send("error")
   }
 });
 

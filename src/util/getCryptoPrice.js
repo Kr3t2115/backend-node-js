@@ -1,9 +1,8 @@
-const axios = require('axios');
-const { queryCryptoPrices } = require('./queries');
+const { queryCryptoPrices, queryLiquidation } = require('./queries');
 const WebSocket = require('ws');
 //const WebSocket = require("socket.io-client");
 
-const getCryptoPrices = () =>{
+const getCryptoPrices = async () =>{
 
   const ws = new WebSocket('wss://stream.binance.com:9443/ws');
 
@@ -14,7 +13,7 @@ const getCryptoPrices = () =>{
       "method": "SUBSCRIBE",
       "params":
       [
-      "btcusdt@ticker", "busdusdt@ticker", "ethusdt@ticker", "xrpusdt@ticker", "maskusdt@ticker", "maticusdt@ticker", "mdtusdt@ticker", "bnbusdt@ticker", "ltcusdt@ticker", "galausdt@ticker", "truusdt@ticker", "ftmusdt@ticker", "opusdt@ticker", "dogeusdt@ticker", "aptusdt@ticker", "solusdt@ticker", "cfxusdt@ticker", "ldousdt@ticker", "magicusdt@ticker", "filusdt@ticker", "lqtyusdt@ticker", "dydxusdt@ticker", "eurusdt@ticker", "adausdt@ticker", "stxusdt@ticker", "avaxusdt@ticker", "snxusdt@ticker", "agixusdt@ticker", "sandusdt@ticker", "vgxusdt@ticker", "manausdt@ticker", "shibusdt@ticker", "hftusdt@ticker", "eosusdt@ticker", "perpusdt@ticker", "dotusdt@ticker", "fetusdt@ticker", "linkusdt@ticker", "nearusdt@ticker", "trxusdt@ticker", "gnsusdt@ticker", "hookusdt@ticker", "gmtusdt@ticker", "perlusdt@ticker", "stgusdt@ticker", "bnxusdt@ticker", "ssvusdt@ticker", "achusdt@ticker", "gmxusdt@ticker", "mkrusdt@ticker", "dfusdt@ticker", "grtusdt@ticker", "rndrusdt@ticker", "yfiusdt@ticker", "imxusdt@ticker", "xmrusdt@ticker", "renusdt@ticker", "arusdt@ticker", "fxsusdt@ticker", "dashusdt@ticker", "crvusdt@ticker", "ghstusdt@ticker", "neousdt@ticker", "luncusdt@ticker", "atomusdt@ticker", "icpusdt@ticker", "ankrusdt@ticker", "injusdt@ticker", "lokausdt@ticker", "uniusdt@ticker", "phbusdt@ticker", "axsusdt@ticker", "audusdt@ticker", "etcusdt@ticker", "algousdt@ticker", "cocosusdt@ticker", "rifusdt@ticker", "egldusdt@ticker", "highusdt@ticker", "klayusdt@ticker", "minausdt@ticker", "apeusdt@ticker", "sushiusdt@ticker", "troyusdt@ticker", "jasmyusdt@ticker", "kavausdt@ticker", "linausdt@ticker", "roseusdt@ticker", "vetusdt@ticker", "tusdt@ticker", "oceanusdt@ticker", "wavesusdt@ticker", "ilvusdt@ticker", "chzusdt@ticker", "peopleusdt@ticker", "xemusdt@ticker", "irisusdt@ticker", "cvpusdt@ticker", "synusdt@ticker", "runeusdt@ticker", "twtusdt@ticker", "gbpusdt@ticker", "flowusdt@ticker", "ensusdt@ticker", "enjusdt@ticker", "aaveusdt@ticker", "voxelusdt@ticker", "zilusdt@ticker", "alcxusdt@ticker", "zecusdt@ticker", "duskusdt@ticker", "hbarusdt@ticker", "atausdt@ticker", "astrusdt@ticker", "bondusdt@ticker", "dodousdt@ticker", "lrcusdt@ticker", "pntusdt@ticker", "thetausdt@ticker", "lunausdt@ticker", "hotusdt@ticker", "akrousdt@ticker", "qntusdt@ticker", "ambusdt@ticker", "dentusdt@ticker", "gtcusdt@ticker", "degousdt@ticker", "oneusdt@ticker", "galusdt@ticker", "bandusdt@ticker", "fisusdt@ticker", "bchusdt@ticker", "litusdt@ticker", "bakeusdt@ticker", "iotxusdt@ticker", "sklusdt@ticker", "darusdt@ticker", "aliceusdt@ticker", "rvnusdt@ticker", "alphausdt@ticker", "cotiusdt@ticker", "batusdt@ticker", "audiousdt@ticker", "ltousdt@ticker", "winusdt@ticker", "blzusdt@ticker", "tkousdt@ticker", "xtzusdt@ticker", "ckbusdt@ticker", "xlmusdt@ticker", "ksmusdt@ticker", "woousdt@ticker", "belusdt@ticker", "cakeusdt@ticker", "quickusdt@ticker", "chrusdt@ticker", "ontusdt@ticker", "mtlusdt@ticker", "compusdt@ticker", "spellusdt@ticker", "qtumusdt@ticker", "zenusdt@ticker", "sfpusdt@ticker", "rsrusdt@ticker", "chessusdt@ticker", "kncusdt@ticker", "dockusdt@ticker", "ctkusdt@ticker", "celousdt@ticker", "iostusdt@ticker", "slpusdt@ticker", "icxusdt@ticker", "unfiusdt@ticker", "glmrusdt@ticker", "vibusdt@ticker", "yfiiusdt@ticker", "elfusdt@ticker", "stmxusdt@ticker", "trbusdt@ticker", "1inchusdt@ticker", "omgusdt@ticker", "drepusdt@ticker", "bswusdt@ticker", "burgerusdt@ticker", "ognusdt@ticker", "rlcusdt@ticker", "leverusdt@ticker", "iotausdt@ticker", "vidtusdt@ticker", "yggusdt@ticker", "acausdt@ticker", "sxpusdt@ticker", "tlmusdt@ticker", "celrusdt@ticker", "c98usdt@ticker", "agldusdt@ticker", "arpausdt@ticker", "kdausdt@ticker", "pyrusdt@ticker", "cvxusdt@ticker", "ampusdt@ticker", "santosusdt@ticker", "rayusdt@ticker", "paxgusdt@ticker", "waxpusdt@ticker", "lptusdt@ticker", "powrusdt@ticker", "wingusdt@ticker", "datausdt@ticker", "reefusdt@ticker", "fidausdt@ticker", "bicousdt@ticker", "rplusdt@ticker", "badgerusdt@ticker", "fluxusdt@ticker", "balusdt@ticker", "laziousdt@ticker", "ctsiusdt@ticker", "flmusdt@ticker", "api3usdt@ticker", "alpineusdt@ticker", "mcusdt@ticker", "tfuelusdt@ticker", "betausdt@ticker", "zrxusdt@ticker", "kp3rusdt@ticker", "ctxcusdt@ticker", "mobusdt@ticker", "phausdt@ticker", "radusdt@ticker", "vthousdt@ticker", "tvkusdt@ticker", "nmrusdt@ticker", "hardusdt@ticker", "qiusdt@ticker", "joeusdt@ticker", "tomousdt@ticker", "btsusdt@ticker", "adxusdt@ticker", "osmousdt@ticker", "wtcusdt@ticker", "scrtusdt@ticker", "nknusdt@ticker", "xecusdt@ticker", "storjusdt@ticker", "portousdt@ticker", "hiveusdt@ticker", "sunusdt@ticker", "antusdt@ticker", "polsusdt@ticker", "ampusdt@ticker", "santosusdt@ticker", "rayusdt@ticker", "paxgusdt@ticker", "waxpusdt@ticker", "lptusdt@ticker", "powrusdt@ticker", "wingusdt@ticker", "datausdt@ticker", "reefusdt@ticker", "fidausdt@ticker", "bicousdt@ticker", "rplusdt@ticker", "badgerusdt@ticker", "fluxusdt@ticker", "balusdt@ticker", "laziousdt@ticker", "ctsiusdt@ticker", "flmusdt@ticker", "api3usdt@ticker", "alpineusdt@ticker", "mcusdt@ticker", "tfuelusdt@ticker", "betausdt@ticker", "zrxusdt@ticker", "kp3rusdt@ticker", "ctxcusdt@ticker", "mobusdt@ticker", "phausdt@ticker", "radusdt@ticker", "vthousdt@ticker", "tvkusdt@ticker", "nmrusdt@ticker", "hardusdt@ticker", "qiusdt@ticker", "joeusdt@ticker", "tomousdt@ticker", "btsusdt@ticker", "adxusdt@ticker", "osmousdt@ticker", "wtcusdt@ticker", "scrtusdt@ticker", "nknusdt@ticker", "xecusdt@ticker", "storjusdt@ticker", "portousdt@ticker", "hiveusdt@ticker", "sunusdt@ticker", "antusdt@ticker", "polsusdt@ticker", "cosusdt@ticker", "autousdt@ticker", "clvusdt@ticker", "forusdt@ticker", "jstusdt@ticker", "prosusdt@ticker", "pondusdt@ticker", "nexousdt@ticker", "viteusdt@ticker", "ongusdt@ticker", "dgbusdt@ticker", "ookiusdt@ticker", "movrusdt@ticker", "auctionusdt@ticker", "reiusdt@ticker", "mdxusdt@ticker", "oxtusdt@ticker", "polyxusdt@ticker", "wanusdt@ticker", "wrxusdt@ticker", "ornusdt@ticker", "umausdt@ticker", "sysusdt@ticker", "rareusdt@ticker", "firousdt@ticker", "ardrusdt@ticker", "bttcusdt@ticker", "hifiusdt@ticker", "scusdt@ticker", "idexusdt@ticker", "pundixusdt@ticker", "stptusdt@ticker", "ernusdt@ticker", "mboxusdt@ticker", "mlnusdt@ticker", "mblusdt@ticker", "ogusdt@ticker", "bifiusdt@ticker", "cityusdt@ticker", "bethusdt@ticker", "barusdt@ticker", "farmusdt@ticker", "avausdt@ticker", "straxusdt@ticker", "xvgusdt@ticker", "superusdt@ticker", "requsdt@ticker", "epxusdt@ticker", "utkusdt@ticker", "bntusdt@ticker", "atmusdt@ticker", "psgusdt@ticker", "xnousdt@ticker", "omusdt@ticker", "alpacausdt@ticker", "plausdt@ticker", "dexeusdt@ticker", "multiusdt@ticker", "asrusdt@ticker", "neblusdt@ticker", "acmusdt@ticker", "forthusdt@ticker", "frontusdt@ticker", "lskusdt@ticker", "steemusdt@ticker", "xvsusdt@ticker", "funusdt@ticker", "diausdt@ticker", "nulsusdt@ticker", "fiousdt@ticker", "juvusdt@ticker", "dcrusdt@ticker", "kmdusdt@ticker", "gnousdt@ticker", "wnxmusdt@ticker"
+      "btcusdt@ticker", "ethusdt@ticker"
       ],
       "id": 1
     }))
@@ -25,11 +24,22 @@ let object = {}
   ws.on('message', function message(data) {
     let test = data.toString()
     test = JSON.parse(test)
-    object[test.s] = test.c
+    if(test.e){
+      object[test.s] = test.c
+    }
+    
   });
 
-  setInterval(() => {
+  setTimeout(async function run(){
     const query = queryCryptoPrices(JSON.stringify(object));
+    const keys = Object.keys(object);
+    for (const key of keys) {
+      console.log(key)
+      const liquidation = await queryLiquidation(key, object[key]);
+      console.log(liquidation)
+      
+    }
+    setTimeout(run, 2000)
   }, 2000);
 }
 
