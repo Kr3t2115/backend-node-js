@@ -1,6 +1,7 @@
 const express = require("express");
 const { validateData } = require("./controller");
-const { queryPairPrice, queryUserBalance, insertPosition, queryPosition, deletePosition } = require("./queries");
+const { queryPairPrice, queryUserBalance, insertPosition, queryPosition, deletePosition, updatePosition } = require("./queries");
+const numberOfDecimalPlaces = require('../../../util/numberOfDecimalPlaces');
 const router = express.Router();
 
 // funny ping pong answer function
@@ -49,7 +50,7 @@ router.post("/market/open/:pair", async(req, res) => {
   }
 
   if(wallet.balance < pairPrice * data.quantity){
-    res.status(404).json({
+    res.s4tatus(40).json({
       "error_message": "There was a problem with validation",
       "error_code": 1001
     });
@@ -95,6 +96,113 @@ router.post("/market/open/:pair", async(req, res) => {
 router.post("/market/close/:id", async(req, res) => {
   try {
 
+    const decimalPlaces = numberOfDecimalPlaces(req.body.quantity)
+
+    if(!req.body.quantity || decimalPlaces > 1 || req.body.quantity < 0){
+      res.status(404).json({
+        "error_message": "There was a problem with validation",
+        "error_code": 1001213
+      });
+      return; 
+    }
+
+    const position = await queryPosition(req.params.id, req.user.id);
+
+    if(!position){
+      res.status(404).json({
+        "error_message": "There was a problem with validation",
+        "error_code": 100121
+      });
+      return; 
+    }
+
+    if(req.body.quantity > position.quantity){
+      res.status(404).json({
+        "error_message": "There was a problem with validation",
+        "error_code": 1001211
+      });
+      return; 
+    }
+
+    const pairPrice = await queryPairPrice(position.pair);
+
+    if(!pairPrice){
+      res.status(404).json({
+        "error_message": "There was a problem with validation",
+        "error_code": 100125
+      });
+      return; 
+    }
+
+    const wallet = await queryUserBalance(req.user.id)
+    
+    if(!wallet){
+      res.status(404).json({
+        "error_message": "There was a problem with validation",
+        "error_code": 100124
+      });
+      return; 
+    }
+
+    let profit;
+
+    if(position.type == "LONG"){
+      profit = pairPrice * req.body.quantity * position.leverage - position.purchasePrice * req.body.quantity * position.leverage;
+    }else{
+      profit = position.purchasePrice * req.body.quantity * position.leverage - pairPrice * req.body.quantity * position.leverage;
+    }
+
+    const newAccountBalance = wallet.balance + (position.purchasePrice * req.body.quantity + profit);
+
+    let newFuturesBalance = wallet.futureBalance;
+
+
+    let futuresQuantity = Number(newFuturesBalance[position.pair]) - Number(req.body.quantity);
+    futuresQuantity = futuresQuantity.toFixed(1);
+
+    newFuturesBalance[position.pair] = futuresQuantity;
+
+    let updateBalance;
+
+    if(position.quantity == req.body.quantity){
+      updateBalance = await deletePosition(req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance));
+    }else{
+      let quantity = Number(position.quantity) - Number(req.body.quantity);
+      quantity = quantity.toFixed(1);
+
+      updateBalance = await updatePosition(quantity, req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance))
+    }
+
+    
+    if(!updateBalance){
+      res.status(404).json({
+        "error_message": "There was a problem with validation",
+        "error_code": 100123
+      });
+      return; 
+    }
+
+    res.status(200).json({
+      position
+    });
+  } catch (error) {
+    console.log(error)
+  }
+});
+
+router.post("/market/close/part/:id", async(req, res) => {
+  try {
+    
+    const decimalPlaces = numberOfDecimalPlaces(req.body.quantity)
+
+    if(!req.body.quantity || decimalPlaces > 1 || req.body.quantity < 0){
+      res.status(404).json({
+        "error_message": "There was a problem with validation",
+        "error_code": 100121
+      });
+      return; 
+    }
+
     const position = await queryPosition(req.params.id, req.user.id);
 
     if(!position){
@@ -125,34 +233,13 @@ router.post("/market/close/:id", async(req, res) => {
       return; 
     }
 
-    let profit;
 
-    if(position.type == "LONG"){
-      profit = pairPrice * position.quantity * position.leverage - position.purchasePrice * position.quantity * position.leverage;
-    }else{
-      profit = position.purchasePrice * position.quantity * position.leverage - pairPrice * position.quantity * position.leverage;
-    }
 
-    const newAccountBalance = wallet.balance + (position.purchasePrice * position.quantity + profit);
+    res.status(200).send('lol');
 
-    let newFuturesBalance = wallet.futureBalance;
-    newFuturesBalance[position.pair] = newFuturesBalance[position.pair] - position.quantity
-
-    const updateBalance = await deletePosition(req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance))
-
-    if(!updateBalance){
-      res.status(404).json({
-        "error_message": "There was a problem with validation",
-        "error_code": 100123
-      });
-      return; 
-    }
-
-    res.status(200).json({
-      position
-    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    res.status(404).send('erorr');
   }
 });
 

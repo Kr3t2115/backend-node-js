@@ -50,13 +50,13 @@ const insertPosition = async(pair, type, quantity, leverage, purchasePrice, take
   return true;
 }
 
-const updatePosition = async() => {
+const updatePosition = async(quantity, id, userId, newAccountBalance, newFutureBalance) => {
   try {
     await pool.query('BEGIN');
 
     await pool.query({
       rowMode: 'object',
-      text: `INSERT INTO futures_positions (pair, type, quantity, leverage, \"purchasePrice"\, \"takeProfit"\, \"stopLoss"\, \"userId\", \"liquidationPrice"\) VALUES ('${pair}', '${type}', '${quantity}', '${leverage}', '${purchasePrice}', ${takeProfit}, ${stopLoss}, '${userId}', ${liquidationPrice});`
+      text: `UPDATE futures_positions SET quantity=${quantity} WHERE id=${id} AND \"userId\"='${userId}';`
     });
 
     await pool.query({

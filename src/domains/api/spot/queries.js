@@ -67,7 +67,6 @@ const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBa
 
 const updatePosition = async(quantity, purchasePrice, pair, userId, newAccountBalance, newCryptoBalance) => {
   try {
-    console.log(quantity, purchasePrice, pair, userId, newAccountBalance, newCryptoBalance)
     await pool.query('BEGIN');
 
     await pool.query({
@@ -88,17 +87,28 @@ const updatePosition = async(quantity, purchasePrice, pair, userId, newAccountBa
   return true;
 }
 
-const deletePosition = async(pair, userId) => {
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `DELETE FROM spot_positions WHERE pair='${pair}' AND \"userId\" = '${userId}';`
-  });
+const deletePosition = async(pair, userId, newAccountBalance, newCryptoBalance) => {
 
-  if(result.rowCount == 1){
-    return result.rowCount;
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM spot_positions WHERE pair='${pair}' AND \"userId\" = '${userId}';`
+      });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet SET balance='${newAccountBalance}', \"spotBalance\" = '${newCryptoBalance}' WHERE \"userId\"='${userId}';`
+    });
+
+    await pool.query('COMMIT');
+  } catch (error) {
+    console.log(error)
+    return false;
   }
+  return true;
 
-  return false;
 }
 
 const queryPostition = async(pair, userId) => {

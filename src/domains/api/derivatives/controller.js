@@ -1,13 +1,6 @@
 const numberOfDecimalPlaces = require("../../../util/numberOfDecimalPlaces");
 
-const futuresPairs = ["ETHUSDT", "BTCUSDT"];
-
 const validateData = (data, pairPrice) => {
-  
-  if(!futuresPairs.includes(data.pair)){
-    return 2;
-  }
-
   const decimalPlaces = numberOfDecimalPlaces(data.quantity);
 
   if(decimalPlaces > 1 || data.quantity <= 0){

@@ -1,7 +1,6 @@
 * Posprzątąć kod SPOT
 * Dodać kupowanie spot limit
 
-* Dodać uśrednianie pozycji w futures
-* te same dźwignie mają się uśredniać, różne mają tworzyć inne pozycje
+Dodać walidacje czy quantity nie jest liczbą ujemną futures i spot;
 
-Użytkownik otwierając pozycję futures dostaje do swojego portfela kryptowaluty, pozycja może mieć inną wartość w zależności od dźwigni. Dla różnych dźwigni będą różne pozycje.
+nie uśredniamy pozycji!

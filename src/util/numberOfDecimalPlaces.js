@@ -9,7 +9,7 @@ const numberOfDecimalPlaces = (quantity) => {
   const quantityString = quantity.toString(); 
   const decimalPlaces = quantityString.indexOf('.') === -1 ? 0 : quantityString.split('.')[1].length;
 
-  return decimalPlaces;
+  return decimalPlaces; // if "." returns number of decimal places, if "." doesnt exists returns 0, if quantity = 0 returns false;
 }
   
 module.exports = numberOfDecimalPlaces;
