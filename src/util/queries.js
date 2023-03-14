@@ -14,8 +14,6 @@ const queryCryptoPrices = async (updatedPrices) => {
   }
 }
 
-
-
 const queryLiquidation = async (pair, price) => {
   try {
     const result = await pool.query({
@@ -24,8 +22,6 @@ const queryLiquidation = async (pair, price) => {
       AND (type='LONG' AND(\"stopLoss\" >= ${price} OR \"takeProfit\" <= ${price} OR \"liquidationPrice\" >= ${price})) 
       OR (pair='${pair}' AND (type='SHORT' AND(\"stopLoss\" <= ${price} OR \"takeProfit\" >= ${price} OR \"liquidationPrice\" <= ${price})))`
     })
-
-    
 
     if(result.rowCount){
       console.log(pair + price)
