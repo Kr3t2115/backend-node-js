@@ -154,7 +154,6 @@ router.post("/market/close/:id", async(req, res) => {
 
     let newFuturesBalance = wallet.futureBalance;
 
-
     let futuresQuantity = Number(newFuturesBalance[position.pair]) - Number(req.body.quantity);
     futuresQuantity = futuresQuantity.toFixed(1);
 

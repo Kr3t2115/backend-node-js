@@ -1,4 +1,5 @@
-const pool = require('../config/db')
+const pool = require('../config/db');
+const closePosition = require('./closePosition');
 
 const queryCryptoPrices = async (updatedPrices) => {
   const result = await pool.query({
@@ -13,6 +14,8 @@ const queryCryptoPrices = async (updatedPrices) => {
   }
 }
 
+
+
 const queryLiquidation = async (pair, price) => {
   try {
     const result = await pool.query({
@@ -21,8 +24,31 @@ const queryLiquidation = async (pair, price) => {
       AND (type='LONG' AND(\"stopLoss\" >= ${price} OR \"takeProfit\" <= ${price} OR \"liquidationPrice\" >= ${price})) 
       OR (type='SHORT' AND(\"stopLoss\" <= ${price} OR \"takeProfit\" >= ${price} OR \"liquidationPrice\" <= ${price}))`
     })
-  
+
     if(result.rowCount){
+
+      result.rows.map(x => {
+        if(x.type == "LONG"){
+          if(x.stopLoss >= price){
+            closePosition(x.id, x.pair, x.stopLoss, x.type, x.quantity, x.leverage, x.purchasePrice, x.userId);
+          }else if(x.liquidationPrice >= price){
+            closePosition(x.id, x.pair, x.liquidationPrice, x.type, x.quantity, x.leverage, x.purchasePrice, x.userId);
+          }else if(x.takeProfit <= price){
+            closePosition(x.id, x.pair, x.takeProfit, x.type, x.quantity, x.leverage, x.purchasePrice, x.userId);
+          }
+        }
+        else{
+          if(x.stopLoss <= price){
+            closePosition(x.id, x.pair, x.stopLoss, x.type, x.quantity, x.leverage, x.purchasePrice, x.userId);
+          }else if(x.liquidationPrice <= price){
+            closePosition(x.id, x.pair, x.liquidationPrice, x.type, x.quantity, x.leverage, x.purchasePrice, x.userId);
+          }else if(x.takeProfit >= price){
+            closePosition(x.id, x.pair, x.takeProfit, x.type, x.quantity, x.leverage, x.purchasePrice, x.userId);
+          }
+        }
+        
+      })
+
       return result.rows;
     }else{
       return false

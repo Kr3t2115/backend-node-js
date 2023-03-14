@@ -34,9 +34,9 @@ let object = {}
     const query = queryCryptoPrices(JSON.stringify(object));
     const keys = Object.keys(object);
     for (const key of keys) {
-      console.log(key)
+      //console.log(key)
       const liquidation = await queryLiquidation(key, object[key]);
-      console.log(liquidation)
+      //console.log(liquidation)
       
     }
     setTimeout(run, 2000)

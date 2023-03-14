@@ -2,4 +2,5 @@
 * Dodać kupowanie spot limit
 
 Dodanie że TP i SL mogą mieć 3 cyfry po przecinku.
-źle liczona jest likwidacja
+źle liczona jest likwidacja shortu
+stoploss nmie moze byc nizej od likwidacji
