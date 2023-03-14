@@ -22,10 +22,14 @@ const queryLiquidation = async (pair, price) => {
       rowMode: 'object',
       text: `SELECT * FROM futures_positions WHERE pair='${pair}' 
       AND (type='LONG' AND(\"stopLoss\" >= ${price} OR \"takeProfit\" <= ${price} OR \"liquidationPrice\" >= ${price})) 
-      OR (type='SHORT' AND(\"stopLoss\" <= ${price} OR \"takeProfit\" >= ${price} OR \"liquidationPrice\" <= ${price}))`
+      OR (pair='${pair}' AND (type='SHORT' AND(\"stopLoss\" <= ${price} OR \"takeProfit\" >= ${price} OR \"liquidationPrice\" <= ${price})))`
     })
 
+    
+
     if(result.rowCount){
+      console.log(pair + price)
+      console.log(result.rows)
 
       result.rows.map(x => {
         if(x.type == "LONG"){

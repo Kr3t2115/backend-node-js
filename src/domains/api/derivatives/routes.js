@@ -57,7 +57,13 @@ router.post("/market/open/:pair", async(req, res) => {
     return;
   }
 
-  const liquidationPrice = pairPrice - pairPrice / data.leverage;
+  let liquidationPrice;
+
+  if(data.type == "LONG"){
+    liquidationPrice = Number(pairPrice) - Number(pairPrice) / Number(data.leverage);
+  }else{
+    liquidationPrice = Number(pairPrice) + Number(pairPrice) / Number(data.leverage);
+  }
 
   const newAccountBalance = wallet.balance - pairPrice * data.quantity;
 
