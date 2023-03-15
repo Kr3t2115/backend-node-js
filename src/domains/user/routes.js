@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const {queryEmail, registerUser, queryAccount, registerWallet} = require('./queries');
 const {validateRegister, hashPassword, generateJWT, validateLogin, comparePassword} = require('./controller');
-const cors = require('cors')
 
 // login user route, returns jwt token as http token
 router.post("/login", async (req, res) => {
