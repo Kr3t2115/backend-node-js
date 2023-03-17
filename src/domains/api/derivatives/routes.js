@@ -168,12 +168,12 @@ router.post("/market/close/:id", async(req, res) => {
     let updateBalance;
 
     if(position.quantity == req.body.quantity){
-      updateBalance = await deletePosition(req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance));
+      updateBalance = await deletePosition(req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance), position.pair, position.quantity, req.body.quantity, position.leverage, position.purchasePrice, pairPrice);
     }else{
       let quantity = Number(position.quantity) - Number(req.body.quantity);
       quantity = quantity.toFixed(1);
 
-      updateBalance = await updatePosition(quantity, req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance))
+      updateBalance = await updatePosition(quantity, req.params.id, req.user.id, newAccountBalance, JSON.stringify(newFuturesBalance), position.pair, position.quantity, req.body.quantity, position.leverage, position.purchasePrice, pairPrice)
     }
    
     if(!updateBalance){
@@ -212,7 +212,7 @@ router.post("/position/update/:id", async(req, res) => {
           "error_code": 10
         });
         return; 
-      }else if(data.stopLoss >= pairPrice && data.stopLoss !== null){
+      }else if(data.stopLoss >= pairPrice && data.stopLoss !== null || data.stopLoss <= position.liquidationPrice){
         res.status(404).json({
           "error_message": "There was a problem with validation",
           "error_code": 11
@@ -228,7 +228,7 @@ router.post("/position/update/:id", async(req, res) => {
           "error_code": 12
         });
         return; 
-      }else if(data.stopLoss <= pairPrice && data.stopLoss !== null){
+      }else if(data.stopLoss <= pairPrice && data.stopLoss !== null || data.stopLoss >= position.liquidationPrice){
         res.status(404).json({
           "error_message": "There was a problem with validation",
           "error_code": 13

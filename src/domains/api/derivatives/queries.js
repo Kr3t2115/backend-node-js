@@ -50,7 +50,7 @@ const insertPosition = async(pair, type, quantity, leverage, purchasePrice, take
   return true;
 }
 
-const updatePosition = async(quantity, id, userId, newAccountBalance, newFutureBalance) => {
+const updatePosition = async(quantity, id, userId, newAccountBalance, newFutureBalance, pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice) => {
   try {
     await pool.query('BEGIN');
 
@@ -62,6 +62,11 @@ const updatePosition = async(quantity, id, userId, newAccountBalance, newFutureB
     await pool.query({
       rowMode: 'object',
       text: `UPDATE wallet SET balance='${newAccountBalance}', \"futureBalance\"='${newFutureBalance}' WHERE \"userId\"='${userId}';`
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO futures_history (pair, \"quantityPosition"\, \"quantitySold"\, leverage, \"purchasePrice"\, \"sellingPrice"\, \"userId\") VALUES ('${pair}', '${quantityPosition}', '${quantitySold}', '${leverage}', '${purchasePrice}', ${sellingPrice}, '${userId}');`
     });
 
     await pool.query('COMMIT');
@@ -85,7 +90,7 @@ const queryPosition = async(id, userId) => {
   } 
 }
 
-const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) => {
+const deletePosition = async(id, userId, newAccountBalance, newFutureBalance, pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice) => {
   try {
     await pool.query('BEGIN');
 
@@ -97,6 +102,11 @@ const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) =>
     await pool.query({
       rowMode: 'object',
       text: `UPDATE wallet SET balance='${newAccountBalance}', \"futureBalance\"='${newFutureBalance}' WHERE \"userId\"='${userId}';`
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO futures_history (pair, \"quantityPosition"\, \"quantitySold"\, leverage, \"purchasePrice"\, \"sellingPrice"\, \"userId\") VALUES ('${pair}', '${quantityPosition}', '${quantitySold}', '${leverage}', '${purchasePrice}', ${sellingPrice}, '${userId}');`
     });
 
     await pool.query('COMMIT');

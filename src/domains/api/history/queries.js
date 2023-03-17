@@ -39,6 +39,25 @@ const querySpotHistory = async (userId) => {
   
 }
 
+const queryFuturesHistoryPair = async (userId, pair) => {
+
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `SELECT *
+    FROM futures_history
+    WHERE \"userId"\ = ${userId} AND pair='${pair}'
+    ORDER BY date DESC
+    LIMIT 20;` 
+  });
+
+  if(result.rows){
+    return result.rows;
+  }else{
+    return false;
+  }
+  
+}
+
 const queryFuturesHistory = async (userId) => {
  
   const result = await pool.query({
@@ -58,4 +77,4 @@ const queryFuturesHistory = async (userId) => {
   
 }
 
-module.exports = { querySpotHistoryPair, querySpotHistory };
+module.exports = { querySpotHistoryPair, querySpotHistory, queryFuturesHistory, queryFuturesHistoryPair };

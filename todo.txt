@@ -1,5 +1,6 @@
 * Posprzątąć kod SPOT
 * Dodać kupowanie spot limit
+* Pobieranie w historii trejdów nie powinno wyświetlać user_id
 
 stoploss nmie moze byc nizej od likwidacji
 
