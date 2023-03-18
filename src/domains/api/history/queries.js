@@ -1,80 +1,95 @@
 const pool = require('../../../config/db');
 
-// query returning user opened positions
+// function that returns the last 20 historical positions for the spot market for a given pair
 const querySpotHistoryPair = async (userId, pair) => {
-
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `SELECT *
-    FROM spot_history
-    WHERE \"userId"\ = ${userId} AND pair='${pair}'
-    ORDER BY date DESC
-    LIMIT 20;` 
-  });
-
-  if(result.rows){
-    return result.rows;
-  }else{
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM spot_history
+      WHERE "userId" = $1 AND "pair"=$2
+      ORDER BY date DESC
+      LIMIT 20;`,
+      values: [userId, pair]
+    });
+  
+    if(result.rows){
+      return result.rows;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
     return false;
   }
-  
 }
 
+// function that returns the last 20 historical positions for the spot market
 const querySpotHistory = async (userId) => {
- 
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `SELECT *
-    FROM spot_history
-    WHERE \"userId"\ = ${userId}
-    ORDER BY date DESC
-    LIMIT 20;` 
-  });
-
-  if(result.rows){
-    return result.rows;
-  }else{
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM spot_history
+      WHERE "userId" = $1
+      ORDER BY date DESC
+      LIMIT 20;`,
+      values: [userId]
+    });
+  
+    if(result.rows){
+      return result.rows;
+    }
+    return false;  
+  } catch (error) {
+    console.log(error);
     return false;
   }
-  
 }
 
+// function that returns the last 20 historical positions for the futures market for a given pair
 const queryFuturesHistoryPair = async (userId, pair) => {
-
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `SELECT *
-    FROM futures_history
-    WHERE \"userId"\ = ${userId} AND pair='${pair}'
-    ORDER BY date DESC
-    LIMIT 20;` 
-  });
-
-  if(result.rows){
-    return result.rows;
-  }else{
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM futures_history
+      WHERE "userId" = $1 AND "pair"=$2
+      ORDER BY date DESC
+      LIMIT 20;`,
+      values: [userId, pair]
+    });
+    
+    if(result.rows){
+      return result.rows;
+    }
     return false;
-  }
-  
+  } catch (error) {
+    console.log(error);
+    return false;
+  }  
 }
 
+// function that returns the last 20 historical positions for the futures market
 const queryFuturesHistory = async (userId) => {
- 
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `SELECT *
-    FROM futures_history
-    WHERE \"userId"\ = ${userId}
-    ORDER BY date DESC
-    LIMIT 20;` 
-  });
-
-  if(result.rows){
-    return result.rows;
-  }else{
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM futures_history
+      WHERE "userId" = $1
+      ORDER BY date DESC
+      LIMIT 20;`,
+      values: [userId]
+    });
+  
+    if(result.rows){
+      return result.rows;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
     return false;
   }
-  
 }
 
 module.exports = { querySpotHistoryPair, querySpotHistory, queryFuturesHistory, queryFuturesHistoryPair };

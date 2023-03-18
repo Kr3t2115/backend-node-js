@@ -10,7 +10,7 @@ const updatePosition = require("./position/updatePosition");
 router.use("/market", openPosition);
 router.use("/market", closePosition);
 
+// routes to update a position
 router.use("/position", updatePosition);
-
 
 module.exports = router;

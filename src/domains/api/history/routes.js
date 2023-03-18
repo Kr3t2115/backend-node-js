@@ -1,57 +1,17 @@
 const express = require("express");
-const { querySpotHistoryPair, querySpotHistory, queryFuturesHistory, queryFuturesHistoryPair } = require("./queries");
+const spotHistoryByPair = require("./spot/historyByPair");
+const spotHistoryAll = require('./spot/historyAll');
+const futuresHistoryByPair = require('./futures/historyByPair');
+const futuresHistoryAll = require('./futures/historyAll');
+
 const router = express.Router();  
 
-router.get("/spot/last/:pair", async (req, res) => {
+// routes to the spot market
+router.use("/spot", spotHistoryByPair);
+router.use("/spot", spotHistoryAll);
 
-  // function accepts the user id and returns the currently opened positions by the user
-  const trades = await querySpotHistoryPair(req.user.id, req.params.pair);
-
-  if(!trades){
-    res.status(200).json(null)
-    return;
-  }
-
-  res.status(200).json(trades);
-});
-
-router.get("/spot/last", async (req, res) => {
-
-  // function accepts the user id and returns the currently opened positions by the user
-  const trades = await querySpotHistory(req.user.id);
-
-  if(!trades){
-    res.status(200).json(null)
-    return;
-  }
-  
-  res.status(200).json(trades);
-});
-
-router.get("/derivatives/last", async (req, res) => {
-
-  // function accepts the user id and returns the currently opened positions by the user
-  const trades = await queryFuturesHistory(req.user.id);
-
-  if(!trades){
-    res.status(200).json(null)
-    return;
-  }
-  
-  res.status(200).json(trades);
-});
-
-router.get("/derivatives/last/:pair", async (req, res) => {
-
-  // function accepts the user id and returns the currently opened positions by the user
-  const trades = await queryFuturesHistoryPair(req.user.id, req.params.pair);
-
-  if(!trades){
-    res.status(200).json(null)
-    return;
-  }
-
-  res.status(200).json(trades);
-});
+// routes to the futures market
+router.use("/futures", futuresHistoryByPair);
+router.use("/futures", futuresHistoryAll);
 
 module.exports = router;

@@ -6,7 +6,7 @@ const getUserWallet = require("../../../../services/getUserWallet");
 const router = express.Router();
 
 // route responsible for closing futures positions
-router.post("/market/close/:id", async(req, res) => {
+router.post("/close/:id", async(req, res) => {
   try {
     // function that returns the number of decimal places
     const decimalPlaces = numberOfDecimalPlaces(req.body.quantity)

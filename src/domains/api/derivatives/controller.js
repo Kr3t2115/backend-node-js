@@ -13,7 +13,7 @@ const validateData = (data, pairPrice, liquidationPrice) => {
     return 201;
   }
   else if(data.type == "LONG"){
-    if(data.stopLoss > pairPrice || data.stopLoss < liquidationPrice){
+    if(data.stopLoss && (data.stopLoss > pairPrice || data.stopLoss < liquidationPrice)){
       return 202;
     }
     else if(data.takeProfit && data.takeProfit < pairPrice){
@@ -21,7 +21,7 @@ const validateData = (data, pairPrice, liquidationPrice) => {
     }
   }
   else if(data.type == "SHORT"){
-    if(data.stopLoss < pairPrice || data.stopLoss > liquidationPrice){
+    if(data.stopLoss && (data.stopLoss < pairPrice || data.stopLoss > liquidationPrice)){
       return 204;
     }
     else if(data.takeProfit && data.takeProfit > pairPrice){

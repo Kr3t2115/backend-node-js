@@ -2,3 +2,7 @@
 * Dodać kupowanie spot limit
 * Pobieranie w historii trejdów nie powinno wyświetlać user_id
 * dodać opcjonalne pobieranie większej ilości rekordów historycznych
+
+Sprawdź czy likwidowanie na pewno działa dobrze (czy usuwa z portfela i usuwa pozycje) oraz czy shorty dobrze sa liczone
+
+PRZY SHORCIE W PORTFELU UŻYTKOWNIKA POWINNO BYĆ ODEJMOWANE A JEST DODAWANE!
