@@ -1,5 +1,5 @@
 const express = require("express");
-const { querySpotHistory } = require("../queries");
+const { getSpotHistory } = require("../queries");
 
 const router = express.Router();  
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/last", async (req, res) => {
 
   // function takes user id given in request, returns user's historical position 
-  const trades = await querySpotHistory(req.user.id);
+  const trades = await getSpotHistory(req.user.id);
 
   if(!trades){
     res.status(200).json(null)

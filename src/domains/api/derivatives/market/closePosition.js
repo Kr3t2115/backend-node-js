@@ -1,7 +1,7 @@
 const express = require("express");
 const { deletePosition, updatePosition, getPosition } = require("../queries");
 const numberOfDecimalPlaces = require('../../../../util/numberOfDecimalPlaces');
-const getPairPrice = require("../../../../services/getPairPrice");
+const getPairPrice = require("../../../../services/getSpotPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
 const router = express.Router();
 

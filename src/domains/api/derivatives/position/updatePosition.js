@@ -1,6 +1,6 @@
 const express = require("express");
 const {updateTPSL, getPosition } = require("../queries");
-const getPairPrice = require("../../../../services/getPairPrice");
+const getPairPrice = require("../../../../services/getSpotPairPrice");
 const { validateUpdateData } = require("../controller");
 const router = express.Router();
 

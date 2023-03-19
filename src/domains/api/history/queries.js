@@ -1,7 +1,7 @@
 const pool = require('../../../config/db');
 
 // function that returns the last 20 historical positions for the spot market for a given pair
-const querySpotHistoryPair = async (userId, pair) => {
+const getSpotHistoryPair = async (userId, pair) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
@@ -24,7 +24,7 @@ const querySpotHistoryPair = async (userId, pair) => {
 }
 
 // function that returns the last 20 historical positions for the spot market
-const querySpotHistory = async (userId) => {
+const getSpotHistory = async (userId) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
@@ -47,7 +47,7 @@ const querySpotHistory = async (userId) => {
 }
 
 // function that returns the last 20 historical positions for the futures market for a given pair
-const queryFuturesHistoryPair = async (userId, pair) => {
+const getFuturesHistoryPair = async (userId, pair) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
@@ -70,7 +70,7 @@ const queryFuturesHistoryPair = async (userId, pair) => {
 }
 
 // function that returns the last 20 historical positions for the futures market
-const queryFuturesHistory = async (userId) => {
+const getFuturesHistory = async (userId) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
@@ -92,4 +92,4 @@ const queryFuturesHistory = async (userId) => {
   }
 }
 
-module.exports = { querySpotHistoryPair, querySpotHistory, queryFuturesHistory, queryFuturesHistoryPair };
+module.exports = { getSpotHistoryPair, getSpotHistory, getFuturesHistory, getFuturesHistoryPair };

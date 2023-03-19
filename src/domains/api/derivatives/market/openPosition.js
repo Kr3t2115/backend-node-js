@@ -1,7 +1,7 @@
 const express = require("express");
 const { validateData } = require("../controller");
 const { insertPosition } = require("../queries");
-const getPairPrice = require("../../../../services/getPairPrice");
+const getPairPrice = require("../../../../services/getSpotPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
 
 const router = express.Router();

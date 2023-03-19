@@ -1,5 +1,5 @@
 const express = require("express");
-const { querySpotHistoryPair } = require("../queries");
+const { getSpotHistoryPair } = require("../queries");
 
 const router = express.Router();  
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/last/:pair", async (req, res) => {
 
   // function takes user id and pair given in request, returns user's historical positions
-  const trades = await querySpotHistoryPair(
+  const trades = await getSpotHistoryPair(
     req.user.id, 
     req.params.pair
   );

@@ -1,7 +1,9 @@
 const express = require("express");
+const getPairPrice = require("../../../services/getSpotPairPrice");
+const getUserWallet = require("../../../services/getUserWallet");
 const numberOfDecimalPlaces = require('../../../util/numberOfDecimalPlaces')
 const {priceAveraging} = require("./controller");
-const {queryUserBalance, queryPairPrice, updateWallet, insertPosition, queryPostition, deletePosition, updatePosition, insertHistoricTrade} = require("./queries");
+const { insertPosition, queryPostition, deletePosition, updatePosition, insertHistoricTrade} = require("./queries");
 const router = express.Router();
 
 // declaration of cryptocurrency pairs that are accepted
@@ -9,19 +11,19 @@ const spotPairs = ["ETHUSDT", "BTCUSDT"];
 
 // user spot balance route, returns the current spot account balance
 router.get("/balance", async (req, res) => {
-  const cryptoBalance = await queryUserBalance(req.user.id);
+  const wallet = await getUserWallet(req.user.id);
 
   res.status(200).json(
-    cryptoBalance.spotBalance
+    wallet.spotBalance
   );
 });
 
 // user spot balance route, returns the current spot account balance for requested pair
 router.get("/balance/:pair", async (req, res) => {
-  const cryptoBalance = await queryUserBalance(req.user.id);
+  const wallet = await getUserWallet(req.user.id);
   
   res.status(200).json({
-    [req.params.pair]: cryptoBalance.spotBalance[req.params.pair]
+    [req.params.pair]: wallet.spotBalance[req.params.pair]
   });
 });
 
@@ -41,7 +43,7 @@ router.post("/market/buy/:pair", async (req, res) => {
     }
     
     // function that returns the current price of the pair
-    const pairPrice = await queryPairPrice(req.params.pair);
+    const pairPrice = await getPairPrice(req.params.pair);
     if (!pairPrice){
       res.status(404).json({
         "error_message": "There is a problem with the specified cryptocurrency pair",
@@ -51,10 +53,10 @@ router.post("/market/buy/:pair", async (req, res) => {
     }
 
     // function that returns the current user account wallet information
-    const userWallet = await queryUserBalance(req.user.id);
+    const wallet = await getUserWallet(req.user.id);
 
     // checking whether the user can afford this purchase
-    if(pairPrice * req.body.quantity > userWallet.balance){
+    if(pairPrice * req.body.quantity > wallet.balance){
       res.status(404).json({
         "error_message": "There was a problem with the purchase of cryptocurrencies, you cannot afford to buy the amount",
         "error_code": 999
@@ -63,21 +65,21 @@ router.post("/market/buy/:pair", async (req, res) => {
     }
 
     // calculation of a new account balance, and declaration of a cryptocurrency balance object
-    const newAccountBalance = userWallet.balance - pairPrice * req.body.quantity;
+    const newAccountBalance = wallet.balance - pairPrice * req.body.quantity;
     
-    let newCryptocurrencyBalance = userWallet.spotBalance;
+    let newCryptocurrencyBalance = wallet.spotBalance;
 
     let position;
 
     // conditional statement checks if this account has any cryptocurrencies in the spot account, on this basis it creates a new object
-    if(!userWallet.spotBalance?.[req.params.pair] || userWallet.spotBalance?.[req.params.pair] == 0){
+    if(!wallet.spotBalance?.[req.params.pair] || wallet.spotBalance?.[req.params.pair] == 0){
       newCryptocurrencyBalance = {};
       newCryptocurrencyBalance[req.params.pair] = req.body.quantity;
 
       // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
       position = await insertPosition(req.params.pair, req.body.quantity, pairPrice, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance));
     }else{
-      let cryptoQuantity = Number(req.body.quantity) + Number(userWallet.spotBalance[req.params.pair]);
+      let cryptoQuantity = Number(req.body.quantity) + Number(wallet.spotBalance[req.params.pair]);
 
       newCryptocurrencyBalance[req.params.pair] = cryptoQuantity.toFixed(1);
 
@@ -104,6 +106,9 @@ router.post("/market/buy/:pair", async (req, res) => {
     
   } catch (error) {
     console.log(error);
+    res.status(404).json({
+      "error": "An unexpected error occurred"
+    });
   }
 });
 
@@ -132,12 +137,12 @@ router.post("/market/sell/:pair", async (req, res) => {
     }
     
     // function that returns the current user account wallet information
-    const userWallet = await queryUserBalance(req.user.id);
+    const wallet = await getUserWallet(req.user.id);
 
     // declaring the amount of purchased cryptocurrencies, because the subsequent reference of the object prevents us from reading this value
-    const pairQuantity = userWallet.spotBalance[req.params.pair];
+    const pairQuantity = wallet.spotBalance[req.params.pair];
 
-    if(!userWallet.spotBalance?.[req.params.pair] || pairQuantity < req.body.quantity){
+    if(!wallet.spotBalance?.[req.params.pair] || pairQuantity < req.body.quantity){
       res.status(404).json({
         "error_message": "You do not own as much cryptocurrency as you want to sell.",
         "error_code": 999
@@ -146,11 +151,11 @@ router.post("/market/sell/:pair", async (req, res) => {
     }
 
     // function that returns the current price of the pair
-    const pairPrice = await queryPairPrice(req.params.pair);
+    const pairPrice = await getPairPrice(req.params.pair);
     
     // calculation of a new account balance, and declaration of a cryptocurrency balance object
-    const newAccountBalance = userWallet.balance + pairPrice * req.body.quantity;
-    let newCryptocurrencyBalance = userWallet.spotBalance;
+    const newAccountBalance = wallet.balance + pairPrice * req.body.quantity;
+    let newCryptocurrencyBalance = wallet.spotBalance;
     
     let cryptoQuantity = Number(pairQuantity) - Number(req.body.quantity);
     cryptoQuantity = cryptoQuantity.toFixed(1)
@@ -163,25 +168,14 @@ router.post("/market/sell/:pair", async (req, res) => {
 
     // check whether position should be deleted or reduced
     if (req.body.quantity == pairQuantity) {
-      newPositionData = await deletePosition(req.params.pair, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance));
+      newPositionData = await deletePosition(req.params.pair, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance), req.body.quantity, userPosition.purchasePrice, pairPrice);
     } else {
-      newPositionData = await updatePosition(cryptoQuantity, userPosition.purchasePrice, req.params.pair, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance));
+      newPositionData = await updatePosition(cryptoQuantity, userPosition.purchasePrice, req.params.pair, req.user.id, newAccountBalance, JSON.stringify(newCryptocurrencyBalance), req.body.quantity, pairPrice);
     }
 
     if(!newPositionData){
       res.status(404).json({
         "error_message": "There was a problem updating your position data",
-        "error_code": 999
-      });
-      return;
-    }
-
-    // adding a trade to history
-    const newTradeHistory = await insertHistoricTrade(req.params.pair, req.body.quantity, userPosition.purchasePrice, pairPrice, req.user.id);
-
-    if(!newTradeHistory){
-      res.status(404).json({
-        "error_message": "There was a problem updating your history of positions",
         "error_code": 999
       });
       return;
