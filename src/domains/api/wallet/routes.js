@@ -1,11 +1,11 @@
 const express = require("express");
-const queryBalance = require("./queries");
+const getUserWallet = require("../../../services/getUserWallet");
 const router = express.Router();
 
 // user balance route, returns the current account balance
 router.get("/balance", async (req, res) => {
   // function returning current account balance, accepts user id from jwt payload
-  const walletInfo = await queryBalance(req.user.id);
+  const walletInfo = await getUserWallet(req.user.id);
 
   if(!walletInfo){
     res.status(404).json({

@@ -104,7 +104,7 @@ const deletePosition = async(pair, userId, newAccountBalance, newCryptoBalance, 
   }
 }
 
-const queryPostition = async(pair, userId) => {
+const getPostition = async(pair, userId) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
@@ -124,4 +124,4 @@ const queryPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, queryPostition, deletePosition, updatePosition};
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition};

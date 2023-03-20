@@ -6,3 +6,7 @@
 Sprawdź czy likwidowanie na pewno działa dobrze (czy usuwa z portfela i usuwa pozycje) oraz czy shorty dobrze sa liczone
 
 PRZY SHORCIE W PORTFELU UŻYTKOWNIKA POWINNO BYĆ ODEJMOWANE A JEST DODAWANE!
+Dodać futures balance
+Dodać rollbacki do zapytań
+
+dodanie pozycji powinno zwracać id

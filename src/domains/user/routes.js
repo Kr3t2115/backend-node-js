@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {queryEmail, registerUser, queryAccount, registerWallet} = require('./queries');
+const {queryEmail, registerUser, queryAccount} = require('./queries');
 const {validateRegister, hashPassword, generateJWT, validateLogin, comparePassword} = require('./controller');
 
 // login user route, returns jwt token as http token
@@ -93,38 +93,25 @@ router.post("/register", async (req, res) => {
     // function that hashes a password, returns a hash
     const hashedPassword = hashPassword(registerData.password);
     // function that insert user data into the database, returns true if added successfully otherwise returns false
-    const registerPassed = registerUser(registerData, hashedPassword);
+    const registerPassed = await registerUser(registerData, hashedPassword);
 
-    if(registerPassed){
-      // function that returns the details of the user who has registered
-      const userData = await queryAccount(registerData.email);
-
-      // function that registers the user's wallet, returns true if added successfully otherwise returns false
-      const walletRegister = await registerWallet(userData.id);
-
-      if(!walletRegister){
-        res.status(500).json({
-          "error_message": "There was a problem with adding the wallet to the system",
-          "error_code": 123
-        });
-        return;
-      }
-
-      // function that returns jwt token. Accepts values added to payload, such as email and user id
-      const token = generateJWT(registerData.email, userData.id); 
-      res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)});
-      res.status(200).json({
-        "success_message": "The account has been successfully registered",
-        "success_code": 131,
-        "token": token
-      });
-    }else{
+    if(!registerPassed){
       res.status(500).json({
         "error_message": "There was a problem with adding the account to the system because the email address was taken, check the error_code for more information",
         "error_code": 122
       });
     }
+
+    // function that returns jwt token. Accepts values added to payload, such as email and user id
+    const token = generateJWT(registerData.email, registerPassed); 
+    res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)});
+    res.status(200).json({
+      "success_message": "The account has been successfully registered",
+      "success_code": 131,
+      "token": token
+    });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       "error_message": "There was a unidentified problem",
       "error_code": 123

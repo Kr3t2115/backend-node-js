@@ -58,11 +58,11 @@ const validateLogin = (loginData) => {
 
 // function that compares password to password hash, takes password and hashed password
 const comparePassword = (password, hashedPassword) => {
-    if (bcrypt.compareSync(password, hashedPassword)) {
-        return true;
-      } else {
-        return false;
-      }
+  if (bcrypt.compareSync(password, hashedPassword)) {
+      return true;
+    } else {
+      return false;
+    }
 }
 
 module.exports = { validateRegister, hashPassword, generateJWT, validateLogin, comparePassword };

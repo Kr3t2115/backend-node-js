@@ -112,7 +112,7 @@ router.post("/open/:pair", async(req, res) => {
   }
 
   res.status(200).json({
-    "success": "the position has been added successfully"
+    "success": "the position has been added successfully",
   });
   } catch (error) {
     console.log(error)

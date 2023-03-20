@@ -5,7 +5,6 @@ const cors = require('cors');
 
 const apiRoutes = require("../domains/api/routes");
 const userRoutes = require("../domains/user/routes");
-const cryptocurrenciesRoutes = require("../domains/cryptoPrices/routes");
 
 function authenticateToken(req, res, next) {
   const token = req.cookies.token;
@@ -23,7 +22,6 @@ function authenticateToken(req, res, next) {
 }
 
 router.use("/user", userRoutes);
-router.use("/cryptocurrencies", cryptocurrenciesRoutes);
 router.use(authenticateToken);
 router.use("/api", apiRoutes);
 

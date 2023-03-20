@@ -3,7 +3,7 @@ const { getSpotPositionsByPair } = require("../queries");
 const router = express.Router();
 
 // route returns the currently open positions in the spot market by the user and passed pair
-router.get("/spot/:pair", async (req, res) => {
+router.get("/:pair", async (req, res) => {
 
   const pair = req.params.pair;
 
