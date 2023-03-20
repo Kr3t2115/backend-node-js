@@ -1,28 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const cors = require('cors');
 
 const apiRoutes = require("../domains/api/routes");
 const userRoutes = require("../domains/user/routes");
-
-function authenticateToken(req, res, next) {
-  const token = req.cookies.token;
-  if (token == null){
-    res.sendStatus(401);
-    return;
-  }
-
-  jwt.verify(token, process.env.ACCESS_KEY, (err, user) => {
-    if (err) 
-      return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-}
+const verifyToken = require("../services/verifyToken");
 
 router.use("/user", userRoutes);
-router.use(authenticateToken);
+// secured route by verifying the jwt token
+router.use(verifyToken);
 router.use("/api", apiRoutes);
 
 

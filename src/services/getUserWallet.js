@@ -5,7 +5,10 @@ const getUserWallet = async (userId) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
-      text: `SELECT * FROM wallet WHERE \"userId\"='${userId}';`
+      text: `SELECT * 
+      FROM wallet 
+      WHERE "userId" = $1;`,
+      values: [userId]
     });
   
     if(result.rowCount == 1){

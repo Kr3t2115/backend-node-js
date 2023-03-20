@@ -1,0 +1,62 @@
+const express = require("express");
+const router = express.Router();
+const { queryAccount } = require('../queries');
+const { generateJWT, validateLogin, comparePassword } = require('../controller');
+
+// login user route, returns jwt token as http token
+router.post("/", async (req, res) => {
+  try {
+    // declare object with data from request
+    const loginData = {
+      email: req.body.email.toLowerCase(),
+      password: req.body.password
+    }
+
+    // function that validate login data, returns error code if validation rejected, or false if validation passed
+    const validateError = validateLogin(loginData);
+    if (validateError){
+      res.status(400).json({
+        "error_message": "There was a problem validating the submitted data, check the error_code for more information",
+        "error_code": validateError
+      });
+      return;
+    }
+
+    // function that checks if the entered email is in the database, returns false if email not found, else returns user information
+    const accountExists = await queryAccount(loginData.email);
+    if(!accountExists){
+      res.status(404).json({
+        "error_message": "We cant find account with that email",
+        "error_code": 190
+      });
+      return;
+    }
+    
+    // function that compares the entered password with the user's password in the database, returns true if the passwords match, else return false
+    const passwordMatch = comparePassword(req.body.password, accountExists.password);
+    
+    if(passwordMatch){
+      const token = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
+      res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)});
+      res.status(200).json({
+        "success_message": "Login success",
+        "success_code": 132,
+        "token": token
+      });
+    }else{
+      res.status(404).json({
+        "error_message": "We cant compare password with that email",
+        "error_code": 191
+      });
+      return;
+    }
+
+  } catch (error) {
+    res.status(404).json({
+      "error_message": "An unknown error occurred",
+      "error_code": 191
+    });
+  }
+});
+
+module.exports = router;

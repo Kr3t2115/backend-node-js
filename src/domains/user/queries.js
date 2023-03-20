@@ -1,69 +1,51 @@
 const pool = require('../../config/db');
 
-// query if there is a user with the given email
-const queryEmail = async (email) => {
+// new user registration function
+const registerUser = async (firstname, lastname, email, hashedPassword) => {
+  try {
+    await pool.query('BEGIN');
+
+    const { rows: [user] } = await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO users ("firstname", "lastname", "email", "password") 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING id;`,
+      values: [firstname, lastname, email, hashedPassword]
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO wallet ("balance", "userId") VALUES (10000, $1);`,
+      values: [user.id]
+    });
+
+    await pool.query('COMMIT');
+    return user.id;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+// function that checks whether the account with the given e-mail exists
+const queryAccount = async (email) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
       text: `SELECT * 
       FROM users 
-      WHERE "email" = $1`,
+      WHERE email = $1;`,
       values: [email]
     });
   
-    if(result.rowCount != 0){
-      return true;
+    if(result.rowCount == 1){
+      return result.rows[0];
     }
     return false;
   } catch (error) {
-    console.log(error)
-    return false;
-  }
-  
-}
-
-// query to register a new user
-const registerUser = async (registerData, hashedPassword) => {
-  try {
-    await pool.query('BEGIN');
-
-    const { rows: [user] } = await pool.query(`INSERT INTO users (firstname, lastname, email, password) VALUES ('${registerData.firstname}', '${registerData.lastname}', '${registerData.email}', '${hashedPassword}') RETURNING id;`)
-
-    await pool.query(`INSERT INTO wallet (balance, \"userId\") VALUES (10000, '${user.id}');`);
-
-    await pool.query('COMMIT');
-    return user.id;
-  } catch (error) {
+    console.log(error);
     return false;
   }
 }
 
-// query that registers the user's wallet
-// const registerWallet = async (id) => {
-//   const result = await pool.query({
-//     rowMode: 'object',
-//     text: ``
-//   });
-
-//   if(result.rowCount == 1){
-//     return true;
-//   }else{
-//     return false;
-//   }
-// }
-
-// query a user account
-const queryAccount = async (email) => {
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `SELECT * FROM users WHERE email='${email}';`
-  });
-
-  if(result.rowCount == 1){
-    return result.rows[0];
-  }else{
-    return false;
-  }
-}
-
-module.exports = {queryEmail, registerUser, queryAccount};
+module.exports = { registerUser, queryAccount};

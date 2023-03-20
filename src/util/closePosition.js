@@ -1,8 +1,9 @@
 const pool = require('../config/db');
+const getUserWallet = require('../services/getUserWallet');
 
 const closePosition = async (id, pair, closePrice, type, quantity, leverage, purchasePrice, userId) => {
   
-  const wallet = await queryUserBalance(userId);
+  const wallet = await getUserWallet(userId);
 
   let profit;
 
@@ -21,22 +22,14 @@ const closePosition = async (id, pair, closePrice, type, quantity, leverage, pur
 
   newFuturesBalance[pair] = futuresQuantity;
 
-  updateBalance = await deletePosition(id, userId, newAccountBalance, JSON.stringify(newFuturesBalance));
+  updateBalance = await deletePosition(
+    id, 
+    userId, 
+    newAccountBalance, 
+    JSON.stringify(newFuturesBalance)
+  );
 
   console.log(newFuturesBalance);
-}
-
-const queryUserBalance = async (userId) => {
-  const result = await pool.query({
-    rowMode: 'object',
-    text: `SELECT * FROM wallet WHERE \"userId\"='${userId}';`
-  });
-
-  if(result.rowCount == 1){
-    return result.rows[0];
-  }else{
-    return false;
-  }
 }
 
 const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) => {
@@ -45,12 +38,17 @@ const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) =>
 
     await pool.query({
       rowMode: 'object',
-      text: `DELETE FROM futures_positions WHERE id='${id}' AND \"userId\" = '${userId}';`
+      text: `DELETE FROM futures_positions 
+      WHERE "id" = $1 AND "userId" = $2;`,
+      values: [id, userId]
     });
 
     await pool.query({
       rowMode: 'object',
-      text: `UPDATE wallet SET balance='${newAccountBalance}', \"futureBalance\"='${newFutureBalance}' WHERE \"userId\"='${userId}';`
+      text: `UPDATE wallet 
+      SET "balance" = $1, "futureBalance" = $2 
+      WHERE "userId" = $3;`,
+      values: [newAccountBalance, newFutureBalance, userId]
     });
 
     await pool.query('COMMIT');

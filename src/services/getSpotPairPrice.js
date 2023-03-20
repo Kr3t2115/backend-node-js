@@ -5,7 +5,9 @@ const getPairPrice = async(pair) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
-      text: `SELECT cryptocurrencies FROM crypto_prices WHERE id=1;`
+      text: `SELECT cryptocurrencies 
+      FROM crypto_prices 
+      WHERE id = 1;`,
     });
   
     if(result.rowCount == 1){
