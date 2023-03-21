@@ -1,7 +1,7 @@
 const express = require("express");
 const { validateData } = require("../controller");
 const { insertPosition } = require("../queries");
-const getPairPrice = require("../../../../services/getSpotPairPrice");
+const getPairPrice = require("../../../../services/getFuturesPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
 
 const router = express.Router();
@@ -75,17 +75,39 @@ router.post("/open/:pair", async(req, res) => {
 
   // calculating a new account balance
   const newAccountBalance = wallet.balance - pairPrice * data.quantity;
- 
+  
+  
+
+  let newFutureTypeBalance = {}
   let newFutureBalance = wallet.futureBalance;
   let position;
 
-  // based on whether the user has a given cryptocurrency in a different way, we calculate his new account balance
-  if(!wallet.futureBalance?.[req.params.pair] || wallet.futureBalance?.[req.params.pair] == 0){
-    newFutureBalance = {};
-    newFutureBalance[req.params.pair] = Number(data.quantity).toFixed(1);
+  if(data.type == "LONG"){
+    newFutureTypeBalance = wallet.futureBalance?.long
   }else{
-    const cryptoBalance = Number(data.quantity) + Number(wallet.futureBalance[req.params.pair]);
-    newFutureBalance[req.params.pair] = cryptoBalance.toFixed(1);
+    newFutureTypeBalance = wallet.futureBalance?.short
+  }
+
+  console.log(newFutureTypeBalance)
+
+  if(!newFutureBalance){
+    newFutureBalance = {};
+  }
+
+  // based on whether the user has a given cryptocurrency in a different way, we calculate his new account balance
+  if(!newFutureTypeBalance?.[req.params.pair] || newFutureTypeBalance?.[req.params.pair] == 0){
+    newFutureTypeBalance[req.params.pair] = Number(data.quantity).toFixed(1);
+  }else{
+    const cryptoBalance = Number(data.quantity) + Number(newFutureTypeBalance[req.params.pair]);
+    newFutureTypeBalance[req.params.pair] = cryptoBalance.toFixed(1);
+  }
+
+  console.log(newFutureTypeBalance);
+
+  if(data.type == "LONG"){
+    newFutureBalance.long = newFutureTypeBalance;
+  }else{
+    newFutureBalance.short = newFutureTypeBalance;
   }
 
   // function that adds items to the database returns false if the operation failed
@@ -113,6 +135,7 @@ router.post("/open/:pair", async(req, res) => {
 
   res.status(200).json({
     "success": "the position has been added successfully",
+    "id": position
   });
   } catch (error) {
     console.log(error)

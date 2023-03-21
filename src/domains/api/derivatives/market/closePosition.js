@@ -1,7 +1,7 @@
 const express = require("express");
 const { deletePosition, updatePosition, getPosition } = require("../queries");
 const numberOfDecimalPlaces = require('../../../../util/numberOfDecimalPlaces');
-const getPairPrice = require("../../../../services/getSpotPairPrice");
+const getPairPrice = require("../../../../services/getFuturesPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
 const router = express.Router();
 
@@ -78,12 +78,26 @@ router.post("/close/:id", async(req, res) => {
     const newAccountBalance = wallet.balance + (position.purchasePrice * req.body.quantity + profit);
 
     // calculation of the new balance of futures cryptocurrency
+
+    let newFuturesTypeBalance = wallet.futureBalance;
     let newFuturesBalance = wallet.futureBalance;
 
-    let futuresQuantity = Number(newFuturesBalance[position.pair]) - Number(req.body.quantity);
+    if(position.type == "LONG"){
+      newFuturesTypeBalance = newFuturesBalance.long;
+    }else{
+      newFuturesTypeBalance = newFuturesBalance.short;
+    }
+
+    let futuresQuantity = Number(newFuturesTypeBalance[position.pair]) - Number(req.body.quantity);
     futuresQuantity = futuresQuantity.toFixed(1);
 
-    newFuturesBalance[position.pair] = futuresQuantity;
+    newFuturesTypeBalance[position.pair] = futuresQuantity;
+
+    if(position.type == "LONG"){
+      newFuturesBalance.long = newFuturesTypeBalance;
+    }else{
+      newFuturesBalance.short = newFuturesTypeBalance;
+    }
 
     let updateBalance;
 

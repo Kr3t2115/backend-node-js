@@ -26,13 +26,16 @@ const insertPosition = async(pair, type, quantity, leverage, purchasePrice, take
   try {
     await pool.query('BEGIN');
 
-    await pool.query({
+    const result = await pool.query({
       rowMode: 'object',
       text: `INSERT INTO 
       futures_positions ("pair", "type", "quantity", "leverage", "purchasePrice", "takeProfit", "stopLoss", "userId", "liquidationPrice") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`,
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id;`,
       values: [pair, type, quantity, leverage, purchasePrice, takeProfit, stopLoss, userId, liquidationPrice]
     });
+
+    const newPositionId = result.rows[0].id
 
     await pool.query({
       rowMode: 'object',
@@ -44,11 +47,13 @@ const insertPosition = async(pair, type, quantity, leverage, purchasePrice, take
 
     await pool.query('COMMIT');
 
-  } catch (error) {    
+    return newPositionId;
+    
+  } catch (error) {   
+    await pool.query('ROLLBACK'); 
     console.log(error)
     return false;
   }
-  return true;
 }
 
 // function responsible for updating items in the database and updating the user's wallet. It also adds information to futures_history
@@ -83,6 +88,7 @@ const updatePosition = async(quantity, id, userId, newAccountBalance, newFutureB
     await pool.query('COMMIT');
 
   } catch (error) {
+    await pool.query('ROLLBACK'); 
     console.log(error)
     return false;
   }
@@ -142,6 +148,7 @@ const deletePosition = async (id, userId, newAccountBalance, newFutureBalance, p
     await pool.query('COMMIT');
 
   } catch (error) {
+    await pool.query('ROLLBACK'); 
     console.log(error);
     return false;
   }

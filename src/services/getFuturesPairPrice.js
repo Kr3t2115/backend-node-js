@@ -5,13 +5,13 @@ const getPairPrice = async(pair) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
-      text: `SELECT spot 
+      text: `SELECT futures 
       FROM crypto_prices 
       WHERE id = 1;`,
     });
   
     if(result.rowCount == 1){
-      return result.rows[0].spot[pair];
+      return result.rows[0].futures[pair];
     }
     return false;
   } catch (error) {

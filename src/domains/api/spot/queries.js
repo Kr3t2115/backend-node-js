@@ -24,6 +24,7 @@ const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBa
     await pool.query('COMMIT');
     return true;
   } catch (error) {
+    await pool.query('ROLLBACK'); 
     console.log(error)
     return false;
   }
@@ -64,6 +65,7 @@ const updatePosition = async(cryptoQuantity, purchasePrice, pair, userId, newAcc
     await pool.query('COMMIT');
     return true;
   } catch (error) {
+    await pool.query('ROLLBACK'); 
     console.log(error)
     return false;
   }
@@ -99,6 +101,7 @@ const deletePosition = async(pair, userId, newAccountBalance, newCryptoBalance, 
     await pool.query('COMMIT');
     return true;
   } catch (error) {
+    await pool.query('ROLLBACK'); 
     console.log(error)
     return false;
   }

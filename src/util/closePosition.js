@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 const getUserWallet = require('../services/getUserWallet');
 
+// function closing the position at takeprofit, stoploss and liquidation price
 const closePosition = async (id, pair, closePrice, type, quantity, leverage, purchasePrice, userId) => {
   
   const wallet = await getUserWallet(userId);
@@ -9,18 +10,26 @@ const closePosition = async (id, pair, closePrice, type, quantity, leverage, pur
 
   if(type == "LONG"){
     profit = closePrice * quantity * leverage - purchasePrice * quantity * leverage;
+    newFuturesTypeBalance = wallet.futureBalance.long;
   }else{
     profit = purchasePrice * quantity * leverage - closePrice * quantity * leverage;
+    newFuturesTypeBalance = wallet.futureBalance.short;
   }
 
   const newAccountBalance = wallet.balance + (purchasePrice * quantity + profit);
 
   let newFuturesBalance = wallet.futureBalance;
 
-  let futuresQuantity = Number(newFuturesBalance[pair]) - Number(quantity);
+  let futuresQuantity = Number(newFuturesTypeBalance[pair]) - Number(quantity);
   futuresQuantity = futuresQuantity.toFixed(1);
 
-  newFuturesBalance[pair] = futuresQuantity;
+  newFuturesTypeBalance[pair] = futuresQuantity;
+
+  if(type == "LONG"){
+    newFuturesBalance.long = newFuturesTypeBalance;
+  }else{
+    newFuturesBalance.short = newFuturesTypeBalance;
+  }
 
   updateBalance = await deletePosition(
     id, 
@@ -53,6 +62,7 @@ const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) =>
 
     await pool.query('COMMIT');
   } catch (error) {
+    await pool.query('ROLLBACK'); 
     console.log(error)
     return false;
   }

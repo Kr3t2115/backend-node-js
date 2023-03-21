@@ -22,6 +22,7 @@ const registerUser = async (firstname, lastname, email, hashedPassword) => {
     await pool.query('COMMIT');
     return user.id;
   } catch (error) {
+    await pool.query('ROLLBACK'); 
     console.log(error);
     return false;
   }

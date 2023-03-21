@@ -1,14 +1,15 @@
 const pool = require('../config/db');
 const closePosition = require('./closePosition');
 
-const queryCryptoPrices = async (updatedPrices) => {
+// function updating cryptocurrency prices in the database
+const queryCryptoPrices = async (spotPrices, futuresPrices) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
       text: `UPDATE crypto_prices 
-      SET "cryptocurrencies" = $1 
+      SET "spot" = $1, "futures" = $2
       WHERE id = '1';`,
-      values: [updatedPrices]
+      values: [spotPrices, futuresPrices]
     })
     if(result.rowCount == 1){
       return result.rows[0];
@@ -20,6 +21,7 @@ const queryCryptoPrices = async (updatedPrices) => {
   }  
 }
 
+// function to find positions to be closed at take profit, stop loss and liquidation prices
 const queryLiquidation = async (pair, price) => {
   try {
     const result = await pool.query({
@@ -34,27 +36,28 @@ const queryLiquidation = async (pair, price) => {
 
     // conditional instruction checks at what price the position should be closed
     if(result.rowCount){
-      result.rows.map(position => {
+      for (const position of result.rows) {
         let closeBy;
         if(position.type == "LONG"){
           if(position.stopLoss >= price){
             closeBy = position.stopLoss;
-          }else if(x.liquidationPrice >= price){
+          }else if(position.liquidationPrice >= price){
             closeBy = position.liquidationPrice;
-          }else if(x.takeProfit <= price){
+          }else if(position.takeProfit <= price){
             closeBy = position.takeProfit;
           }
         }
         else{
-          if(x.stopLoss <= price){
+          if(position.stopLoss <= price){
             closeBy = position.stopLoss;
-          }else if(x.liquidationPrice <= price){
+          }else if(position.liquidationPrice <= price){
             closeBy = position.liquidationPrice;
-          }else if(x.takeProfit >= price){
+          }else if(position.takeProfit >= price){
             closeBy = position.takeProfit;
           }
         }
-        closePosition(
+        
+        await closePosition(
           position.id, 
           position.pair, 
           closeBy, 
@@ -64,7 +67,7 @@ const queryLiquidation = async (pair, price) => {
           position.purchasePrice, 
           position.userId
         );
-      })
+      }
       return result.rows;
     }else{
       return false;
