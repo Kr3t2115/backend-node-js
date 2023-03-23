@@ -41,6 +41,7 @@ const closePosition = async (id, pair, closePrice, type, quantity, leverage, pur
   console.log(newFuturesBalance);
 }
 
+// query to delete position
 const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) => {
   try {
     await pool.query('BEGIN');

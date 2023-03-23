@@ -83,17 +83,19 @@ router.post("/open/:pair", async(req, res) => {
   let position;
 
   if(data.type == "LONG"){
-    newFutureTypeBalance = wallet.futureBalance?.long
+    if(wallet.futureBalance?.long){
+      newFutureTypeBalance = wallet.futureBalance?.long
+    }
   }else{
-    newFutureTypeBalance = wallet.futureBalance?.short
+    if(wallet.futureBalance?.short){
+      newFutureTypeBalance = wallet.futureBalance?.short
+    } 
   }
-
-  console.log(newFutureTypeBalance)
 
   if(!newFutureBalance){
     newFutureBalance = {};
   }
-
+  
   // based on whether the user has a given cryptocurrency in a different way, we calculate his new account balance
   if(!newFutureTypeBalance?.[req.params.pair] || newFutureTypeBalance?.[req.params.pair] == 0){
     newFutureTypeBalance[req.params.pair] = Number(data.quantity).toFixed(1);
@@ -101,8 +103,6 @@ router.post("/open/:pair", async(req, res) => {
     const cryptoBalance = Number(data.quantity) + Number(newFutureTypeBalance[req.params.pair]);
     newFutureTypeBalance[req.params.pair] = cryptoBalance.toFixed(1);
   }
-
-  console.log(newFutureTypeBalance);
 
   if(data.type == "LONG"){
     newFutureBalance.long = newFutureTypeBalance;

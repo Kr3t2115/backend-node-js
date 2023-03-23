@@ -5,7 +5,7 @@ const { validateUpdateData } = require("../controller");
 const router = express.Router();
 
 // route responsible for updating futures positions
-router.post("/position/update/:id", async(req, res) => {
+router.post("/update/:id", async(req, res) => {
   try {
     // declare data object
     const data = {

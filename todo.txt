@@ -2,3 +2,5 @@
 * Dodać kupowanie spot limit
 * Pobieranie w historii trejdów nie powinno wyświetlać user_id
 * dodać opcjonalne pobieranie większej ilości rekordów historycznych
+
+PNL W historycznych pozycjach
