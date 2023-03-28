@@ -3,6 +3,41 @@ const router = express.Router();
 const { registerUser, queryAccount } = require('../queries');
 const { validateRegister, hashPassword, generateJWT } = require('../controller');
 
+/**
+ * POST /user/register
+ * @summary User register route
+ * @tags login
+ * @param {string} firstname.required - firstname
+ * @param {string} lastname.required - lastname
+ * @param {string} email.required - User email
+ * @param {string} password.required - User password
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+ * {
+ *  "success_message": "The account has been successfully registered",
+ *  "success_code": 131,
+ *  "token": "token jwt"
+ * }
+ * @return {object} 400 - failed response - application/json
+ * @example response - 400 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 100
+ * }
+ * @return {object} 409 - failed response - application/json
+ * @example response - 409 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 100
+ * }
+ * @return {object} 500 - failed response - application/json
+ * @example response - 500 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 100
+ * }
+ */ 
+
 // register user route, returns jwt token as http token
 router.post("/", async (req, res) => {
   try {

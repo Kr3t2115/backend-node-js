@@ -3,9 +3,38 @@ const router = express.Router();
 const { queryAccount } = require('../queries');
 const { generateJWT, validateLogin, comparePassword } = require('../controller');
 
+
+/**
+ * POST /user/login
+ * @summary User login route
+ * @tags login
+ * @param {string} email.required - User email
+ * @param {string} password.required - User password
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+ * {
+ *  "success_message": "Login success",
+ *  "success_code": 132,
+ *  "token": "token jwt"
+ * }
+ * @return {object} 400 - failed response - application/json
+ * @example response - 400 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 100
+ * }
+ * @return {object} 404 - failed response - application/json
+ * @example response - 404 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 100
+ * }
+ */ 
+
 // login user route, returns jwt token as http token
 router.post("/", async (req, res) => {
   try {
+    console.log(req.body)
     // declare object with data from request
     const loginData = {
       email: req.body.email.toLowerCase(),

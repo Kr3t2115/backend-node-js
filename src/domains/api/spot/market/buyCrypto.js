@@ -5,6 +5,27 @@ const numberOfDecimalPlaces = require('../../../../util/numberOfDecimalPlaces')
 const { addNewPosition, modifyPosition } = require("../controller");
 const router = express.Router();
 
+/**
+ * POST /api/spot/market/buy/:pair
+ * @summary Buy cryptocurrencies
+ * @tags spot
+ * @param {string} pair.required - Cryptocurrencies pair
+ * @param {string} quantity.required - Cryptocurrencies quantity
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+ * {
+ *  "success_message": "The purchase was carried out correctly",
+ *  "purchase_pair": "ETHUSDT",
+ *  "purchase_quantity": 1.3,
+*   "purchase_amount": 1843.21
+ * }
+ * @return {object} 404 - failed response - application/json
+ * @example response - 400 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 100
+ * }
+ */ 
 // buying cryptocurrency route, takes the name of the pair as an argument
 router.post("/buy/:pair", async (req, res) => {
   try {

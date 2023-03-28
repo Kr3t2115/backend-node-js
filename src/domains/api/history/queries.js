@@ -7,7 +7,7 @@ const getSpotHistoryPair = async (userId, pair) => {
       rowMode: 'object',
       text: `SELECT *
       FROM spot_history
-      WHERE "userId" = $1 AND "pair"=$2
+      WHERE "userId" = $1 AND "pair"= $2
       ORDER BY date DESC
       LIMIT 20;`,
       values: [userId, pair]

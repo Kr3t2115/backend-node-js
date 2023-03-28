@@ -2,6 +2,25 @@ const express = require("express");
 const getUserWallet = require("../../../services/getUserWallet");
 const router = express.Router();
 
+
+/**
+ * GET /api/wallet/balance
+ * @summary User wallet route
+ * @tags wallet
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+ * {
+ *  "currentBalance": 1500,
+ *  "spotBalance":{"ETHUSDT": 1.2},
+ *  "futureBalance": {"BTCUSDT": 0.2}
+ * }
+ * @return {object} 404 - failed response - application/json
+ * @example response - 404 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 101
+ * }
+ */ 
 // user balance route, returns the current account balance
 router.get("/balance", async (req, res) => {
   // function returning current account balance, accepts user id from jwt payload

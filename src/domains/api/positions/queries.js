@@ -7,7 +7,7 @@ const getSpotPositionsAll = async (userId) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM spot_positions 
-      WHERE "userId"='$1`,
+      WHERE "userId"=$1`,
       values: [userId]
     });
   
@@ -28,7 +28,7 @@ const getSpotPositionsByPair = async (userId, pair) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM spot_positions 
-      WHERE "userId"='$1 AND pair = $2`,
+      WHERE "userId"=$1 AND pair = $2`,
       values: [userId, pair]
     });
   
@@ -49,7 +49,7 @@ const getFuturesPositionsAll = async (userId) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM futures_positions 
-      WHERE "userId"='$1`,
+      WHERE "userId"=$1`,
       values: [userId]
     });
   
@@ -70,7 +70,7 @@ const getFuturesPositionsByPair = async (userId, pair) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM futures_positions 
-      WHERE "userId"='$1 AND pair = $2`,
+      WHERE "userId"=$1 AND pair = $2`,
       values: [userId, pair]
     });
   

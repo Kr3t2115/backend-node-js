@@ -5,6 +5,28 @@ const numberOfDecimalPlaces = require('../../../../util/numberOfDecimalPlaces')
 const { getPostition, deletePosition, updatePosition} = require("../queries");
 const router = express.Router();
 
+
+/**
+ * POST /api/spot/market/sell/:pair
+ * @summary Sell cryptocurrencies
+ * @tags spot
+ * @param {string} pair.required - Cryptocurrencies pair
+ * @param {string} quantity.required - Cryptocurrencies quantity
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+ * {
+ *  "success_message": "The sale was carried out correctly",
+ *  "sold_pair": "ETHUSDT",
+ *  "sold_quantity": 1.3,
+*   "sold_amount": 1843.21
+ * }
+ * @return {object} 404 - failed response - application/json
+ * @example response - 400 - example failed response
+ * {
+ *  "error_message": "failed message",
+ *  "error_code": 100
+ * }
+ */ 
 // selling cryptocurrency route, takes the name of the pair as an argument
 router.post("/sell/:pair", async (req, res) => {
   try {

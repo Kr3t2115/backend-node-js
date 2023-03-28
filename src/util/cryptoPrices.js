@@ -31,6 +31,7 @@ const cryptoPrices = async () =>{
           "openPrice": futuresData.o,
           "lastPrice": futuresData.c,
           "highPrice": futuresData.h,
+          "priceChange": futuresData.p,
           "percentChange": futuresData.P
         }
       }
@@ -64,6 +65,7 @@ const cryptoPrices = async () =>{
           "openPrice": spotData.o,
           "lastPrice": spotData.c,
           "highPrice": spotData.h,
+          "priceChange": spotData.p,
           "percentChange": spotData.P
         }
       }
