@@ -83,7 +83,7 @@ router.post("/", async (req, res) => {
 
     // function that returns jwt token. Accepts values added to payload, such as email and user id
     const token = generateJWT(registerData.email, registerPassed);
-    res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)});
+    res.cookie('token', token, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 72000000)});
     res.status(200).json({
       "success_message": "The account has been successfully registered",
       "success_code": 131,

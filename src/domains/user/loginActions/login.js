@@ -3,7 +3,6 @@ const router = express.Router();
 const { queryAccount } = require('../queries');
 const { generateJWT, validateLogin, comparePassword } = require('../controller');
 
-
 /**
  * POST /user/login
  * @summary User login route
@@ -34,7 +33,6 @@ const { generateJWT, validateLogin, comparePassword } = require('../controller')
 // login user route, returns jwt token as http token
 router.post("/", async (req, res) => {
   try {
-    console.log(req.body)
     // declare object with data from request
     const loginData = {
       email: req.body.email.toLowerCase(),
@@ -66,7 +64,7 @@ router.post("/", async (req, res) => {
     
     if(passwordMatch){
       const token = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
-      res.cookie('token', token, {httpOnly: true, expires: new Date(Date.now() + 72000000)});
+      res.cookie('token', token, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 72000000)});
       res.status(200).json({
         "success_message": "Login success",
         "success_code": 132,
