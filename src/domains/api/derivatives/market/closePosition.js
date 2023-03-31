@@ -5,6 +5,24 @@ const getPairPrice = require("../../../../services/getFuturesPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
 const router = express.Router();
 
+/**
+ * POST /api/derivatives/market/close/:id
+ * @summary Cryptocurrencies futures update position
+ * @tags futures
+ * @param {number} id.required - Cryptocurrencies pair
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+    {
+      "success": "the position has been closed successfully"
+    }
+    * @return {object} 404 - success response - application/json
+    * @example response - 404 - example success response
+    {
+      "error_message": "Your position is not as big as you want to sell",
+      "error_code": 106
+    }
+    */
+
 // route responsible for closing futures positions
 router.post("/close/:id", async(req, res) => {
   try {

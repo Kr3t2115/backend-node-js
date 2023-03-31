@@ -4,6 +4,20 @@ const getPairPrice = require("../../../../services/getSpotPairPrice");
 const { validateUpdateData } = require("../controller");
 const router = express.Router();
 
+/**
+ * POST /api/derivatives/position/update/:id
+ * @summary Cryptocurrencies futures update position
+ * @tags futures
+ * @param {number} id.required - Cryptocurrencies pair
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+    {"success": "Position updated successfully"}
+    * @return {object} 404 - success response - application/json
+    * @example response - 404 - example success response
+       {"error_message": "There was a problem retrieving position from the database",
+        "error_code": 105}
+    */
+
 // route responsible for updating futures positions
 router.post("/update/:id", async(req, res) => {
   try {

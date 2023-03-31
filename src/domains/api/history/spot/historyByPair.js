@@ -19,7 +19,7 @@ const router = express.Router();
         "sellingPrice": 1763.92,
         "date": "2023-03-28T13:02:23.079Z",
         "userId": 3
-    },
+    }
 ]
  */ 
 

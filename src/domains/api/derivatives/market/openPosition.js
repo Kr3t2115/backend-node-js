@@ -6,6 +6,25 @@ const getUserWallet = require("../../../../services/getUserWallet");
 
 const router = express.Router();
 
+/**
+ * POST /api/derivatives/market/open/:pair
+ * @summary Cryptocurrencies futures update position
+ * @tags futures
+ * @param {string} pair.required - Cryptocurrencies pair
+ * @return {object} 200 - success response - application/json
+ * @example response - 200 - example success response
+    {
+      "success": "the position has been added successfully",
+      "id": 131
+    }
+    * @return {object} 404 - success response - application/json
+    * @example response - 404 - example success response
+    {
+      "error_message": "There is a problem with the cryptocurrency pair you provided",
+      "error_code": 100
+    }
+    */
+
 // route responsible for opening futures positions
 router.post("/open/:pair", async(req, res) => {
   try {
