@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { queryAccount } = require('../queries');
+const { queryAccount, insertRefreshToken } = require('../queries');
 const { generateJWT, validateLogin, comparePassword } = require('../controller');
 
 /**
@@ -63,12 +63,24 @@ router.post("/", async (req, res) => {
     const passwordMatch = comparePassword(req.body.password, accountExists.password);
     
     if(passwordMatch){
-      const token = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
-      res.cookie('token', token, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 72000000)});
+      const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
+
+      const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
+      if(!addRefreshToken){
+        res.status(404).json({
+          "error_message": "Error with refresh token",
+          "error_code": 190
+        });
+        return;
+      }
+
+      res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
+      res.cookie('REFRESH_TOKEN', REFRESH_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)});
       res.status(200).json({
         "success_message": "Login success",
         "success_code": 132,
-        "token": token
+        "ACCESS_TOKEN": ACCESS_TOKEN,
+        "REFRESH_TOKEN": REFRESH_TOKEN
       });
     }else{
       res.status(404).json({

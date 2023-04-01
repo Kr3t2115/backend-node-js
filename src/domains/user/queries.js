@@ -28,6 +28,46 @@ const registerUser = async (firstname, lastname, email, hashedPassword) => {
   }
 }
 
+const insertRefreshToken = async (token) => {
+  try{
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO refresh_tokens
+      (token) VALUES
+      ($1)`,
+      values: [token]
+    });
+
+    if(result.rowCount == 1){
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+const getRefreshToken = async (token) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM refresh_tokens 
+      WHERE email = $1;`,
+      values: [token]
+    });
+  
+    if(result.rowCount == 1){
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
 // function that checks whether the account with the given e-mail exists
 const queryAccount = async (email) => {
   try {
@@ -49,4 +89,4 @@ const queryAccount = async (email) => {
   }
 }
 
-module.exports = { registerUser, queryAccount};
+module.exports = { registerUser, queryAccount, insertRefreshToken, getRefreshToken };

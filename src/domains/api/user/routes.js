@@ -23,7 +23,8 @@ const router = express.Router();
  */
 // function that logut user
 router.get("/logout", (req, res) => {
-  res.clearCookie('token');
+  res.clearCookie('ACCESS_TOKEN');
+  res.clearCookie('REFRESH_TOKEN');
   res.json({
     "logout": "wylogowano"
   });

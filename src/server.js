@@ -47,7 +47,13 @@ const options = {
 
 app.use(cookies());
 app.use(bodyParser());
-app.use(cors());
+app.use(
+  cors({ 
+      credentials: true, 
+      origin: "http://127.0.0.1:5173", 
+      exposedHeaders: ["Set-Cookie"] 
+  })
+);
 app.use(routes);
 
 
