@@ -29,16 +29,24 @@ const hashPassword = (password) => {
 
 // function generating the jwt token, accept email and id, returns a token
 const generateJWT = (email, id) => {
-  const token = jwt.sign({
+  const ACCESS_TOKEN = jwt.sign({
     'email': email,
     'id': id
   }, 
   process.env.ACCESS_KEY, 
   {
-    expiresIn: '12h'
+    expiresIn: '5m'
   })
 
-  return token;
+  const REFRESH_TOKEN = jwt.sign({
+    'email': email,
+    'id': id
+  },process.env.REFRESH_KEY, 
+  {
+    expiresIn: '30d'
+  })
+
+  return { ACCESS_TOKEN, REFRESH_TOKEN};
 }
 
 // login data validation function, accepts an object with login data, returns an error code

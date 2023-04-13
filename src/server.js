@@ -7,6 +7,14 @@ const routes = require("./routes");
 const cookies = require("cookie-parser");
 const expressJSDocSwagger = require('express-jsdoc-swagger');
 
+app.use(
+    cors({ 
+        credentials: true, 
+        origin: "http://127.0.0.1:5173", 
+        exposedHeaders: ["Set-Cookie"] 
+    })
+);
+
 const options = {
     info: {
       version: '1.0.0',
@@ -47,7 +55,6 @@ const options = {
 
 app.use(cookies());
 app.use(bodyParser());
-app.use(cors());
 app.use(routes);
 
 

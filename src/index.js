@@ -1,8 +1,7 @@
 require("dotenv").config({path: "env/.env"});
 const server = require("./server");
-const cryptoPrices = require("./util/cryptoPrices");
+const {cryptoPrices} = require("./util/cryptoPrices");
 const port = process.env.PORT;
-
 
 const startServer = () => {
   server.listen(port, () => {

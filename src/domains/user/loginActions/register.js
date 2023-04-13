@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, queryAccount } = require('../queries');
+const { registerUser, queryAccount, insertRefreshToken } = require('../queries');
 const { validateRegister, hashPassword, generateJWT } = require('../controller');
 
 /**
@@ -82,12 +82,22 @@ router.post("/", async (req, res) => {
     }
 
     // function that returns jwt token. Accepts values added to payload, such as email and user id
-    const token = generateJWT(registerData.email, registerPassed);
-    res.cookie('token', token, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 72000000)});
+    const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(registerData.email, registerPassed);
+    const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
+    if(!addRefreshToken){
+      res.status(404).json({
+        "error_message": "Error with refresh token",
+        "error_code": 190
+      });
+      return;
+    }
+    res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
+    res.cookie('REFRESH_TOKEN', REFRESH_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)});
     res.status(200).json({
       "success_message": "The account has been successfully registered",
       "success_code": 131,
-      "token": token
+      "ACCESS_TOKEN": ACCESS_TOKEN,
+      "REFRESH_TOKEN": REFRESH_TOKEN
     });
 
   } catch (error) {

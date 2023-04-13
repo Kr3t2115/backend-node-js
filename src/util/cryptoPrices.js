@@ -1,5 +1,16 @@
 const { queryCryptoPrices, queryLiquidation } = require('./queries');
 const {WebSocket, WebSocketServer} = require('ws');
+const express = require("express");
+const router = express.Router();
+
+let pairFuturesPrices = {}
+let cryptoFuturesData = {}
+let pairSpotPrices = {}
+let cryptoSpotData = {}
+
+router.get("/", (req, res) => {
+    res.status(200).json({spot: cryptoSpotData, futures: cryptoFuturesData})
+})
 
 const cryptoPrices = async () =>{
 
@@ -18,8 +29,7 @@ const cryptoPrices = async () =>{
     }))
   });
   
-  let pairFuturesPrices = {}
-  let cryptoFuturesData = {}
+  
 
   // creating objects based on the response from the binance api
   wsFuturesBinance.on('message', function message(data) {
@@ -28,11 +38,14 @@ const cryptoPrices = async () =>{
       if(futuresData.e){
         pairFuturesPrices[futuresData.s] = futuresData.c
         cryptoFuturesData[futuresData.s] = {
+          "pair": futuresData.s,
           "openPrice": futuresData.o,
           "lastPrice": futuresData.c,
           "highPrice": futuresData.h,
+          "lowPrice": futuresData.l,
           "priceChange": futuresData.p,
-          "percentChange": futuresData.P
+          "percentChange": futuresData.P,
+          "volume": futuresData.q
         }
       }
     });
@@ -52,8 +65,7 @@ const cryptoPrices = async () =>{
     }))
   });
   
-  let pairSpotPrices = {}
-  let cryptoSpotData = {}
+
 
   // creating objects based on the response from the binance api
   wsSpotBinance.on('message', function message(data) {
@@ -62,11 +74,14 @@ const cryptoPrices = async () =>{
       if(spotData.e){
         pairSpotPrices[spotData.s] = spotData.c
         cryptoSpotData[spotData.s] = {
+          "pair": spotData.s,
           "openPrice": spotData.o,
           "lastPrice": spotData.c,
           "highPrice": spotData.h,
+          "lowPrice": spotData.l,
           "priceChange": spotData.p,
-          "percentChange": spotData.P
+          "percentChange": spotData.P,
+          "volume": spotData.q
         }
       }
     });
@@ -100,4 +115,4 @@ const cryptoPrices = async () =>{
   }, 2000);
 }
 
-module.exports = cryptoPrices;
+module.exports = {cryptoPrices: cryptoPrices, newRouter: router};
