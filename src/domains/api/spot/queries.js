@@ -38,6 +38,35 @@ const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBa
   }
 }
 
+const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBalance, newCryptoBalance) => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      spot_limit_orders ("pair", "quantity", "price", "type", "userId") 
+      VALUES ($1, $2, $3, $4, $5);`,
+      values: [pair, quantity, price, type, userId]
+      });
+      
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet 
+      SET "balance" = $1, "spotBalance" = $2 
+      WHERE "userId" = $3;`,
+      values: [newAccountBalance, newCryptoBalance, userId]
+    });
+
+    await pool.query('COMMIT');
+    return true;
+  } catch (error) {
+    await pool.query('ROLLBACK'); 
+    console.log(error)
+    return false;
+  }
+}
+
 
 const updatePosition = async(cryptoQuantity, purchasePrice, pair, userId, newAccountBalance, newCryptoBalance, quantity, selling_price) => {
   try {
@@ -143,4 +172,4 @@ const getPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, getPostition, deletePosition, updatePosition};
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder};

@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const closePosition = require('./closePosition');
+const spotLimitBuy = require('./spotLimitBuy');
 
 // function updating cryptocurrency prices in the database
 const queryCryptoPrices = async (spotPrices, futuresPrices) => {
@@ -19,6 +20,35 @@ const queryCryptoPrices = async (spotPrices, futuresPrices) => {
     console.log(error);
     return false;
   }  
+}
+
+const querySpotLimit = async(pair, price) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_orders 
+      WHERE pair = $1
+      AND ("type" = 'buy' AND("price" >= $2)) 
+      OR ("type" = 'sell' AND("price" <= $2))`,
+      values: [pair, price]
+    })
+    if(result.rowCount){
+      for (const position of result.rows) {
+        if(position.type == 'buy'){
+          spotLimitBuy(
+            position.id,
+            position.pair,
+            position.quantity,
+            position.price,
+            position.userId
+          )
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 // function to find positions to be closed at take profit, stop loss and liquidation prices
@@ -78,4 +108,4 @@ const queryLiquidation = async (pair, price) => {
   } 
 }
 
-module.exports = {queryCryptoPrices, queryLiquidation};
+module.exports = {queryCryptoPrices, queryLiquidation, querySpotLimit};

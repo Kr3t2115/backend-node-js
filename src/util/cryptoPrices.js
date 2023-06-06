@@ -1,4 +1,4 @@
-const { queryCryptoPrices, queryLiquidation } = require('./queries');
+const { queryCryptoPrices, queryLiquidation, querySpotLimit } = require('./queries');
 const {WebSocket, WebSocketServer} = require('ws');
 const express = require("express");
 const router = express.Router();
@@ -110,6 +110,7 @@ const cryptoPrices = async () =>{
     const keys = Object.keys(pairFuturesPrices);
     for (const key of keys) {
       await queryLiquidation(key, pairFuturesPrices[key]);
+      await querySpotLimit(key, pairSpotPrices[key]);
     }
     setTimeout(run, 2000)
   }, 2000);
