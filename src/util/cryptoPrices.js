@@ -23,7 +23,7 @@ const cryptoPrices = async () =>{
       "method": "SUBSCRIBE",
       "params":
       [
-      "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker"
+      "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker", "solusdt@ticker", "dotusdt@ticker", "ltcusdt@ticker", "arbusdt@ticker", "galusdt@ticker"
       ],
       "id": 1
     }))
@@ -59,7 +59,7 @@ const cryptoPrices = async () =>{
       "method": "SUBSCRIBE",
       "params":
       [
-      "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker"
+      "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker", "solusdt@ticker", "dotusdt@ticker", "ltcusdt@ticker", "arbusdt@ticker", "galusdt@ticker"
       ],
       "id": 1
     }))
@@ -100,7 +100,7 @@ const cryptoPrices = async () =>{
 
     setInterval(() => {
       ws.send(JSON.stringify({spot: cryptoSpotData, futures: cryptoFuturesData}));
-    }, 5000);
+    }, 2000);
 
   });
 

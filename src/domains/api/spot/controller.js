@@ -15,7 +15,6 @@ const calculatePriceAverage = async (req, pairPrice) => {
 
 // function responsible for adding a new position
 const addNewPosition = async (newCryptocurrencyBalance, quantity, pair, pairPrice, userId, newAccountBalance) => {
-  newCryptocurrencyBalance = {};
   newCryptocurrencyBalance[pair] = quantity;
 
   // the function that adds an position to the database, accepts the pair name, quantity, purchase price and user id
@@ -38,18 +37,19 @@ const modifyPosition = async (quantity, pair, wallet, newCryptocurrencyBalance, 
   newCryptocurrencyBalance[pair] = cryptoQuantity.toFixed(1);
 
   // function that calculates the average purchase price of cryptocurrencies based on quantity and price
-  const newAveragePrice = await calculatePriceAverage(
-    req, 
-    pairPrice
-  );
+//   const newAveragePrice = await calculatePriceAverage(
+//     req, 
+//     pairPrice
+//   );
   
   const position = await updatePosition(
     newCryptocurrencyBalance[pair], 
-    newAveragePrice, 
+    pairPrice, 
     pair, 
     userId, 
     newAccountBalance, 
-    JSON.stringify(newCryptocurrencyBalance)
+    JSON.stringify(newCryptocurrencyBalance),
+    quantity
   );
 
   return position;

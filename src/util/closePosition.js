@@ -9,10 +9,10 @@ const closePosition = async (id, pair, closePrice, type, quantity, leverage, pur
   let profit;
 
   if(type == "LONG"){
-    profit = closePrice * quantity * leverage - purchasePrice * quantity * leverage;
+    profit = closePrice * quantity * leverage - (purchasePrice * quantity * leverage);
     newFuturesTypeBalance = wallet.futureBalance.long;
   }else{
-    profit = purchasePrice * quantity * leverage - closePrice * quantity * leverage;
+    profit = purchasePrice * quantity * leverage - (closePrice * quantity * leverage);
     newFuturesTypeBalance = wallet.futureBalance.short;
   }
 
@@ -35,14 +35,20 @@ const closePosition = async (id, pair, closePrice, type, quantity, leverage, pur
     id, 
     userId, 
     newAccountBalance, 
-    JSON.stringify(newFuturesBalance)
+    JSON.stringify(newFuturesBalance),
+    pair,
+    quantity,
+    leverage,
+    purchasePrice,
+    closePrice,
+    type
   );
 
   console.log(newFuturesBalance);
 }
 
 // query to delete position
-const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) => {
+const deletePosition = async(id, userId, newAccountBalance, newFutureBalance, pair, quantity, leverage, purchasePrice, closePrice, type) => {
   try {
     await pool.query('BEGIN');
 
@@ -51,6 +57,14 @@ const deletePosition = async(id, userId, newAccountBalance, newFutureBalance) =>
       text: `DELETE FROM futures_positions 
       WHERE "id" = $1 AND "userId" = $2;`,
       values: [id, userId]
+    });
+    
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      futures_history ("pair", "quantityPosition", "quantitySold", "leverage", "purchasePrice", "sellingPrice", "userId", "type") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      values: [pair, quantity, quantity, leverage, purchasePrice, closePrice, userId, type]
     });
 
     await pool.query({

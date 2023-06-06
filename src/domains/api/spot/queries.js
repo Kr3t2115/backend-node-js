@@ -12,6 +12,14 @@ const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBa
       VALUES ($1, $2, $3, $4);`,
       values: [pair, quantity, purchasePrice, userId]
       });
+      
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      history_spot ("pair", "type", "quantity", "price", "userId") 
+      VALUES ($1, 'buy', $2, $3, $4);`,
+      values: [pair, quantity, purchasePrice, userId]
+      });  
 
     await pool.query({
       rowMode: 'object',
@@ -54,12 +62,20 @@ const updatePosition = async(cryptoQuantity, purchasePrice, pair, userId, newAcc
     // conditional statement runs an additional query only when quantity and selling_price exist. And they can only exist when selling position
     if(quantity && selling_price){
       await pool.query({
-        rowMode: 'object',
-        text: `INSERT INTO spot_history 
-        ("pair", "quantity", "purchasePrice", "sellingPrice", "userId") 
-        VALUES ($1, $2, $3, $4, $5);`,
-        values: [pair, quantity, purchasePrice, selling_price, userId]
-      });
+          rowMode: 'object',
+          text: `INSERT INTO 
+          history_spot ("pair", "type", "quantity", "price", "userId") 
+          VALUES ($1, 'sell', $2, $3, $4);`,
+          values: [pair, quantity, selling_price, userId]
+      });  
+    }else{
+        await pool.query({
+          rowMode: 'object',
+          text: `INSERT INTO 
+          history_spot ("pair", "type", "quantity", "price", "userId") 
+          VALUES ($1, 'buy', $2, $3, $4);`,
+          values: [pair, quantity, purchasePrice, userId]
+         }); 
     }
     
     await pool.query('COMMIT');
@@ -90,13 +106,13 @@ const deletePosition = async(pair, userId, newAccountBalance, newCryptoBalance, 
       values: [newAccountBalance, newCryptoBalance, userId]
     });
 
-    await pool.query({
-      rowMode: 'object',
-      text: `INSERT INTO spot_history 
-      ("pair", "quantity", "purchasePrice", "sellingPrice", "userId") 
-      VALUES ($1, $2, $3, $4, $5);`,
-      values: [pair, quantity, purchasePrice, selling_price, userId]
-    });
+   await pool.query({
+          rowMode: 'object',
+          text: `INSERT INTO 
+          history_spot ("pair", "type", "quantity", "price", "userId") 
+          VALUES ($1, 'sell', $2, $3, $4);`,
+          values: [pair, quantity, selling_price, userId]
+      });
 
     await pool.query('COMMIT');
     return true;

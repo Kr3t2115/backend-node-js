@@ -6,7 +6,7 @@ const getSpotHistoryPair = async (userId, pair) => {
     const result = await pool.query({
       rowMode: 'object',
       text: `SELECT *
-      FROM spot_history
+      FROM history_spot
       WHERE "userId" = $1 AND "pair"= $2
       ORDER BY date DESC
       LIMIT 20;`,
@@ -29,7 +29,7 @@ const getSpotHistory = async (userId) => {
     const result = await pool.query({
       rowMode: 'object',
       text: `SELECT *
-      FROM spot_history
+      FROM history_spot
       WHERE "userId" = $1
       ORDER BY date DESC
       LIMIT 20;`,

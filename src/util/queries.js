@@ -39,7 +39,7 @@ const queryLiquidation = async (pair, price) => {
       for (const position of result.rows) {
         let closeBy;
         if(position.type == "LONG"){
-          if(position.stopLoss >= price){
+          if(position.stopLoss && position.stopLoss >= price){
             closeBy = position.stopLoss;
           }else if(position.liquidationPrice >= price){
             closeBy = position.liquidationPrice;
@@ -48,7 +48,7 @@ const queryLiquidation = async (pair, price) => {
           }
         }
         else{
-          if(position.stopLoss <= price){
+          if(position.stopLoss && position.stopLoss <= price){
             closeBy = position.stopLoss;
           }else if(position.liquidationPrice <= price){
             closeBy = position.liquidationPrice;

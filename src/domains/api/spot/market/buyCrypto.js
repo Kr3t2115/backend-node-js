@@ -68,9 +68,17 @@ router.post("/buy/:pair", async (req, res) => {
     
     let newCryptocurrencyBalance = wallet.spotBalance;
 
+    if(wallet.spotBalance == null){
+        newCryptocurrencyBalance = {};
+    }
+
     let position;
 
     // conditional statement checks if this account has any cryptocurrencies in the spot account, on this basis it creates a new object
+    
+    // res.status(200).send(newCryptocurrencyBalance);
+    // return;
+    
     if(!wallet.spotBalance?.[req.params.pair] || wallet.spotBalance?.[req.params.pair] == 0){
       position = addNewPosition(
         newCryptocurrencyBalance,
