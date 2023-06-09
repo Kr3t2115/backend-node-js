@@ -54,7 +54,7 @@ const getRefreshToken = async (token) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM refresh_tokens 
-      WHERE email = $1;`,
+      WHERE token = $1;`,
       values: [token]
     });
   
@@ -67,6 +67,7 @@ const getRefreshToken = async (token) => {
     return false;
   }
 }
+
 
 // function that checks whether the account with the given e-mail exists
 const queryAccount = async (email) => {

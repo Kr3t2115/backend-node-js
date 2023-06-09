@@ -3,3 +3,6 @@
 * dodać opcjonalne pobieranie większej ilości rekordów historycznych
 
 PNL W historycznych pozycjach
+
+
+DOPISZ MODIFY DO SPOTLIMITBUY

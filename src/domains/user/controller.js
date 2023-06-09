@@ -46,7 +46,7 @@ const generateJWT = (email, id) => {
     expiresIn: '30d'
   })
 
-  return { ACCESS_TOKEN, REFRESH_TOKEN};
+  return { ACCESS_TOKEN, REFRESH_TOKEN };
 }
 
 // login data validation function, accepts an object with login data, returns an error code

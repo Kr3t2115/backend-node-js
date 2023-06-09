@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, queryAccount } = require('../queries');
+const { registerUser, queryAccount, insertRefreshToken } = require('../queries');
 const { validateRegister, hashPassword, generateJWT } = require('../controller');
 
 /**
@@ -99,6 +99,7 @@ router.post("/", async (req, res) => {
       "ACCESS_TOKEN": ACCESS_TOKEN,
       "REFRESH_TOKEN": REFRESH_TOKEN
     });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({

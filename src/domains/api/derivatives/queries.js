@@ -57,7 +57,7 @@ const insertPosition = async(pair, type, quantity, leverage, purchasePrice, take
 }
 
 // function responsible for updating items in the database and updating the user's wallet. It also adds information to futures_history
-const updatePosition = async(quantity, id, userId, newAccountBalance, newFutureBalance, pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice) => {
+const updatePosition = async(quantity, id, type, userId, newAccountBalance, newFutureBalance, pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice) => {
   try {
     await pool.query('BEGIN');
 
@@ -80,9 +80,9 @@ const updatePosition = async(quantity, id, userId, newAccountBalance, newFutureB
     await pool.query({
       rowMode: 'object',
       text: `INSERT INTO 
-      futures_history ("pair", "quantityPosition", "quantitySold", "leverage", "purchasePrice", "sellingPrice", "userId") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7);`,
-      values: [pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice, userId]
+      futures_history ("pair", "type", "quantityPosition", "quantitySold", "leverage", "purchasePrice", "sellingPrice", "userId") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`,
+      values: [pair, type, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice, userId]
     });
 
     await pool.query('COMMIT');
@@ -118,7 +118,7 @@ const updateTPSL = async(takeProfit, stopLoss, id, userId) => {
 }
 
 // function that removes positions from the database, also updates the user's portfolio, and adds an entry to futures_history
-const deletePosition = async (id, userId, newAccountBalance, newFutureBalance, pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice) => {
+const deletePosition = async (id, userId, type, newAccountBalance, newFutureBalance, pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice) => {
   try {
     await pool.query('BEGIN');
 
@@ -140,9 +140,9 @@ const deletePosition = async (id, userId, newAccountBalance, newFutureBalance, p
     await pool.query({
       rowMode: 'object',
       text: `INSERT INTO 
-      futures_history ("pair", "quantityPosition", "quantitySold", "leverage", "purchasePrice", "sellingPrice", "userId") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      values: [pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice, userId]
+      futures_history ("pair", "quantityPosition", "quantitySold", "leverage", "purchasePrice", "sellingPrice", "userId", "type") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      values: [pair, quantityPosition, quantitySold, leverage, purchasePrice, sellingPrice, userId, type]
     });
 
     await pool.query('COMMIT');

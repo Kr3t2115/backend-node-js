@@ -3,43 +3,46 @@ const jwt = require('jsonwebtoken');
 const express = require("express");
 const router = express.Router();
 
-router.post("/token", (req, res) => {
+router.get("/token", (req, res) => {
+    
+  const token = req.cookies.REFRESH_TOKEN
+    
   try {
-    const token = req.cookies.REFRESH_TOKEN;
-
-    console.log(req.cookies)
-
     const isToken = getRefreshToken(token);
     if(!isToken){
       res.status(403).json({
-        "error": "error"
+        "error": "error1"
       })
       return;
     }
 
-    jwt.verify(token, process.env.REFRESH_TOKEN, (err, data) => {
+    jwt.verify(token, process.env.REFRESH_KEY, (err, data) => {
       if(err){
         res.status(403).json({
-          "error": "error"
+          "error": "error2"
         })
         return;
       }
+      console.log(data)
       const payload = {
         id: data.id,
         email: data.email
       }
+      console.log(payload)
       const ACCESS_TOKEN = jwt.sign(payload, 
         process.env.ACCESS_KEY, 
         {
           expiresIn: '5m'
       })
       res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
-      res.status(200);
+      res.status(200).json({
+          "success": "success"
+      });
     })
   } catch (error) {
     console.log(error)
     res.status(403).json({
-      "error": "error"
+      "error": "error3"
     })
   }
 })

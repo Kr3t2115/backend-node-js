@@ -123,7 +123,8 @@ router.post("/close/:id", async(req, res) => {
     if(position.quantity == req.body.quantity){
       updateBalance = await deletePosition(
         req.params.id, 
-        req.user.id, 
+        req.user.id,
+        position.type,
         newAccountBalance, 
         JSON.stringify(newFuturesBalance), 
         position.pair, position.quantity, 
@@ -139,6 +140,7 @@ router.post("/close/:id", async(req, res) => {
       updateBalance = await updatePosition(
         quantity, 
         req.params.id,
+        position.type,
         req.user.id, 
         newAccountBalance, 
         JSON.stringify(newFuturesBalance), 

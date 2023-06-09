@@ -12,7 +12,44 @@ const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBa
       VALUES ($1, $2, $3, $4);`,
       values: [pair, quantity, purchasePrice, userId]
       });
+      
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      history_spot ("pair", "type", "quantity", "price", "userId") 
+      VALUES ($1, 'buy', $2, $3, $4);`,
+      values: [pair, quantity, purchasePrice, userId]
+      });  
 
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet 
+      SET "balance" = $1, "spotBalance" = $2 
+      WHERE "userId" = $3;`,
+      values: [newAccountBalance, newCryptoBalance, userId]
+    });
+
+    await pool.query('COMMIT');
+    return true;
+  } catch (error) {
+    await pool.query('ROLLBACK'); 
+    console.log(error)
+    return false;
+  }
+}
+
+const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBalance, newCryptoBalance) => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      spot_limit_orders ("pair", "quantity", "price", "type", "userId") 
+      VALUES ($1, $2, $3, $4, $5);`,
+      values: [pair, quantity, price, type, userId]
+      });
+      
     await pool.query({
       rowMode: 'object',
       text: `UPDATE wallet 
@@ -54,12 +91,20 @@ const updatePosition = async(cryptoQuantity, purchasePrice, pair, userId, newAcc
     // conditional statement runs an additional query only when quantity and selling_price exist. And they can only exist when selling position
     if(quantity && selling_price){
       await pool.query({
-        rowMode: 'object',
-        text: `INSERT INTO spot_history 
-        ("pair", "quantity", "purchasePrice", "sellingPrice", "userId") 
-        VALUES ($1, $2, $3, $4, $5);`,
-        values: [pair, quantity, purchasePrice, selling_price, userId]
-      });
+          rowMode: 'object',
+          text: `INSERT INTO 
+          history_spot ("pair", "type", "quantity", "price", "userId") 
+          VALUES ($1, 'sell', $2, $3, $4);`,
+          values: [pair, quantity, selling_price, userId]
+      });  
+    }else{
+        await pool.query({
+          rowMode: 'object',
+          text: `INSERT INTO 
+          history_spot ("pair", "type", "quantity", "price", "userId") 
+          VALUES ($1, 'buy', $2, $3, $4);`,
+          values: [pair, quantity, purchasePrice, userId]
+         }); 
     }
     
     await pool.query('COMMIT');
@@ -90,13 +135,13 @@ const deletePosition = async(pair, userId, newAccountBalance, newCryptoBalance, 
       values: [newAccountBalance, newCryptoBalance, userId]
     });
 
-    await pool.query({
-      rowMode: 'object',
-      text: `INSERT INTO spot_history 
-      ("pair", "quantity", "purchasePrice", "sellingPrice", "userId") 
-      VALUES ($1, $2, $3, $4, $5);`,
-      values: [pair, quantity, purchasePrice, selling_price, userId]
-    });
+   await pool.query({
+          rowMode: 'object',
+          text: `INSERT INTO 
+          history_spot ("pair", "type", "quantity", "price", "userId") 
+          VALUES ($1, 'sell', $2, $3, $4);`,
+          values: [pair, quantity, selling_price, userId]
+      });
 
     await pool.query('COMMIT');
     return true;
@@ -127,4 +172,4 @@ const getPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, getPostition, deletePosition, updatePosition};
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder};

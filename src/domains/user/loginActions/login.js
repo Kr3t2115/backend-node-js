@@ -62,7 +62,7 @@ router.post("/", async (req, res) => {
     // function that compares the entered password with the user's password in the database, returns true if the passwords match, else return false
     const passwordMatch = comparePassword(req.body.password, accountExists.password);
     
-    if(passwordMatch){
+   if(passwordMatch){
       const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
 
       const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
@@ -91,6 +91,7 @@ router.post("/", async (req, res) => {
     }
 
   } catch (error) {
+    console.log(error);
     res.status(404).json({
       "error_message": "An unknown error occurred",
       "error_code": 191

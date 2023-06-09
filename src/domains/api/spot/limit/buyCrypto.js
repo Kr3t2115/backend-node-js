@@ -2,7 +2,7 @@ const express = require("express");
 const getPairPrice = require("../../../../services/getSpotPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
 const numberOfDecimalPlaces = require('../../../../util/numberOfDecimalPlaces')
-const { addNewPosition, modifyPosition } = require("../controller");
+const { insertLimitOrder } = require('../queries');
 const router = express.Router();
 
 /**
@@ -43,9 +43,18 @@ router.post("/buy/:pair", async (req, res) => {
     
     // function that returns the current price of the pair
     const pairPrice = await getPairPrice(req.params.pair);
+    const price = req.body.price;
     if (!pairPrice){
       res.status(404).json({
         "error_message": "There is a problem with the specified cryptocurrency pair",
+        "error_code": 109
+      });
+      return;
+    }
+
+    if(price >= pairPrice){
+      res.status(404).json({
+        "error_message": "There is a problem with the specified price to make order",
         "error_code": 109
       });
       return;
@@ -64,14 +73,8 @@ router.post("/buy/:pair", async (req, res) => {
     }
 
     // calculation of a new account balance, and declaration of a cryptocurrency balance object
-    const newAccountBalance = wallet.balance - pairPrice * req.body.quantity;
-    
+    const newAccountBalance = wallet.balance - price * req.body.quantity;
     let newCryptocurrencyBalance = wallet.spotBalance;
-
-    if(wallet.spotBalance == null){
-        newCryptocurrencyBalance = {};
-    }
-
     let position;
 
     // conditional statement checks if this account has any cryptocurrencies in the spot account, on this basis it creates a new object
@@ -79,28 +82,17 @@ router.post("/buy/:pair", async (req, res) => {
     // res.status(200).send(newCryptocurrencyBalance);
     // return;
     
-    if(!wallet.spotBalance?.[req.params.pair] || wallet.spotBalance?.[req.params.pair] == 0){
-      position = addNewPosition(
-        newCryptocurrencyBalance,
-        req.body.quantity,
-        req.params.pair,
-        pairPrice,
-        req.user.id,
-        newAccountBalance,
-        newCryptocurrencyBalance
-      )
-    }else{
-      position = modifyPosition(
-        req.body.quantity,
-        req.params.pair,
-        wallet,
-        newCryptocurrencyBalance,
-        req,
-        pairPrice,
-        req.user.id,
-        newAccountBalance
-      )
-    }
+    
+    position = insertLimitOrder(
+      req.params.pair,
+      req.body.quantity, 
+      price,
+      req.user.id,
+      'buy',
+      newAccountBalance,
+      newCryptocurrencyBalance
+    )
+  
 
     if(!position){
       res.status(404).json({
