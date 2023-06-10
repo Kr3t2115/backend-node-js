@@ -50,4 +50,17 @@ router.get("/last", async (req, res) => {
   res.status(200).json(trades);
 });
 
+router.get("/last/from/:from", async (req, res) => {
+
+  // function takes user id given in request, returns user's historical position
+  const trades = await getFuturesHistory(req.user.id, req.params.from);
+
+  if(!trades){
+    res.status(200).json(null)
+    return;
+  }
+  
+  res.status(200).json(trades);
+});
+
 module.exports = router;

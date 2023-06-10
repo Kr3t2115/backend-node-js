@@ -54,7 +54,7 @@ router.get("/last", async (req, res) => {
 
   // function takes user id given in request, returns user's historical position 
   const trades = await getSpotHistory(req.user.id);
-  console.log('xd')
+
   if(!trades){
     res.status(200).json(null)
     return;
