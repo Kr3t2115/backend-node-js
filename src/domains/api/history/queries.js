@@ -7,7 +7,7 @@ const getSpotHistoryPair = async (userId, pair) => {
       rowMode: 'object',
       text: `SELECT *
       FROM history_spot
-      WHERE "userId" = $1 AND "pair"= $2
+      WHERE "userId" = $1 AND "pair" LIKE '%' || $2 || '%'     
       ORDER BY date DESC
       LIMIT 20;`,
       values: [userId, pair]
@@ -30,7 +30,7 @@ const getSpotHistoryPairConditional = async (userId, pair, from) => {
       rowMode: 'object',
       text: `SELECT *
       FROM history_spot
-      WHERE "userId" = $1 AND "pair"= $2 AND id < $3
+      WHERE "userId" = $1 AND "pair" LIKE '%' || $2 || '%' AND id < $3
       ORDER BY date DESC
       LIMIT 20;`,
       values: [userId, pair, from]
@@ -100,7 +100,7 @@ const getFuturesHistoryPair = async (userId, pair) => {
       rowMode: 'object',
       text: `SELECT *
       FROM futures_history
-      WHERE "userId" = $1 AND "pair"=$2
+      WHERE "userId" = $1 AND "pair" LIKE '%' || $2 || '%'
       ORDER BY date DESC
       LIMIT 20;`,
       values: [userId, pair]
@@ -122,7 +122,7 @@ const getFuturesHistoryPairConditional = async (userId, pair, from) => {
       rowMode: 'object',
       text: `SELECT *
       FROM futures_history
-      WHERE "userId" = $1 AND "pair" = $2 AND id < $3
+      WHERE "userId" = $1 AND "pair" LIKE '%' || $2 || '%' AND id < $3
       ORDER BY date DESC
       LIMIT 20;`,
       values: [userId, pair, from]
