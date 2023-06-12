@@ -1,5 +1,5 @@
 const express = require("express");
-const { getFuturesHistory } = require("../queries");
+const { getFuturesHistory, getFuturesHistoryConditional } = require("../queries");
 
 const router = express.Router();  
 
@@ -53,7 +53,7 @@ router.get("/last", async (req, res) => {
 router.get("/last/from/:from", async (req, res) => {
 
   // function takes user id given in request, returns user's historical position
-  const trades = await getFuturesHistory(req.user.id, req.params.from);
+  const trades = await getFuturesHistoryConditional(req.user.id, req.params.from);
 
   if(!trades){
     res.status(200).json(null)
