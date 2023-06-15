@@ -4,23 +4,22 @@ const pool = require('../config/db');
 const spotLimitSell = async (id, pair, quantity, price, userId) => {
   const wallet = await getUserWallet(userId);
   
-  let newCryptocurrencyBalance = wallet.spotBalance;
-  newCryptocurrencyBalance[pair] = newCryptocurrencyBalance[pair] - quantity;
+  // let newCryptocurrencyBalance = wallet.spotBalance;
+  // newCryptocurrencyBalance[pair] = newCryptocurrencyBalance[pair] - quantity;
 
-  const newAccountBalance = wallet.balance + price * req.body.quantity;
+  const newAccountBalance = wallet.balance + price * quantity;
 
   const result = await insertSpotByLimit(
     pair,
     quantity,
     price,
     userId,
-    newCryptocurrencyBalance,
+    newAccountBalance,
     id
   )
-  console.log(result)
 } 
 
-const insertSpotByLimit = async(pair, quantity, price, userId, newSpotBalance, id) => {
+const insertSpotByLimit = async(pair, quantity, price, userId, newAccountBalance, id) => {
   try {
     await pool.query('BEGIN');
 
@@ -36,9 +35,17 @@ const insertSpotByLimit = async(pair, quantity, price, userId, newSpotBalance, i
     await pool.query({
       rowMode: 'object',
       text: `UPDATE wallet 
-      SET "spotBalance" = $1 
+      SET "balance" = $1 
       WHERE "userId" = $2;`,
-      values: [newSpotBalance, userId]
+      values: [newAccountBalance, userId]
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      history_spot ("pair", "type", "quantity", "price", "userId") 
+      VALUES ($1, 'sell', $2, $3, $4);`,
+      values: [pair, quantity, price, userId]
     });
 
     await pool.query({

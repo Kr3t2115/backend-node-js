@@ -2,7 +2,7 @@ const express = require("express");
 const getPairPrice = require("../../../../services/getSpotPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
 const numberOfDecimalPlaces = require('../../../../util/numberOfDecimalPlaces')
-const { insertLimitOrder } = require('../queries');
+const { insertLimitOrder, getLimitOrder, closeLimitOrder } = require('../queries');
 const router = express.Router();
 
 /**
@@ -74,8 +74,13 @@ router.post("/buy/:pair", async (req, res) => {
 
     // calculation of a new account balance, and declaration of a cryptocurrency balance object
     const newAccountBalance = wallet.balance - price * req.body.quantity;
-    let newCryptocurrencyBalance = wallet.spotBalance;
     let position;
+    let newCryptocurrencyBalance = wallet.spotBalance;
+
+    if(wallet.spotBalance == null){
+        newCryptocurrencyBalance = {};
+    }
+
 
     // conditional statement checks if this account has any cryptocurrencies in the spot account, on this basis it creates a new object
     
@@ -83,7 +88,7 @@ router.post("/buy/:pair", async (req, res) => {
     // return;
     
     
-    position = insertLimitOrder(
+    position = await insertLimitOrder(
       req.params.pair,
       req.body.quantity, 
       price,
@@ -116,5 +121,42 @@ router.post("/buy/:pair", async (req, res) => {
     });
   }
 });
+
+router.get("/buy/close/:id", async (req, res) => {
+  try {
+    const order = await getLimitOrder(req.params.id, req.user.id);    
+
+    if(!order){
+      res.status(404).json({
+        "error_message": "There was a problem with finding an order with the given id",
+        "error_code": 110
+      });
+      return;
+    }
+
+    const wallet = await getUserWallet(req.user.id);
+
+    const newAccountBalance = wallet.balance + order.price;
+    const closeOrder = await closeLimitOrder(req.params.id, req.user.id, newAccountBalance);
+
+    if(!closeOrder){
+      res.status(404).json({
+        "error_message": "There was a problem closing the order",
+        "error_code": 110
+      });
+      return;
+    }
+
+    res.status(200).json({
+      "success_message": "The close limit order was carried out correctly",
+      "id": req.params.id,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({
+      "error": "An unexpected error occurred"
+    });
+  }
+})
 
 module.exports = router;

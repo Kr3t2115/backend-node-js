@@ -19,7 +19,7 @@ const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBa
       history_spot ("pair", "type", "quantity", "price", "userId") 
       VALUES ($1, 'buy', $2, $3, $4);`,
       values: [pair, quantity, purchasePrice, userId]
-      });  
+    });  
 
     await pool.query({
       rowMode: 'object',
@@ -38,7 +38,7 @@ const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBa
   }
 }
 
-const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBalance, newCryptoBalance) => {
+const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBalance, newCryptocurrencyBalance) => {
   try {
     await pool.query('BEGIN');
 
@@ -55,13 +55,62 @@ const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBa
       text: `UPDATE wallet 
       SET "balance" = $1, "spotBalance" = $2 
       WHERE "userId" = $3;`,
-      values: [newAccountBalance, newCryptoBalance, userId]
+      values: [newAccountBalance, newCryptocurrencyBalance, userId]
     });
 
     await pool.query('COMMIT');
     return true;
   } catch (error) {
     await pool.query('ROLLBACK'); 
+    console.log(error)
+    return false;
+  }
+}
+
+const closeLimitOrder = async(id, userId, newAccountBalance) => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM 
+      spot_limit_orders
+      WHERE id = $1 AND "userId" = $2 ;`,
+      values: [id, userId]
+      });
+      
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet 
+      SET "balance" = $1
+      WHERE "userId" = $2;`,
+      values: [newAccountBalance, userId]
+    });
+
+    await pool.query('COMMIT');
+    return true;
+  } catch (error) {
+    await pool.query('ROLLBACK'); 
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitOrder = async(id, userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_orders 
+      WHERE "id" = $1 AND "userId" = $2;`,
+      values: [id, userId]
+    });
+  
+    if(result.rowCount == 1){
+      return result.rows[0];
+    }
+    return false;
+  } catch (error) {
     console.log(error)
     return false;
   }
@@ -172,4 +221,4 @@ const getPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder};
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder };

@@ -74,8 +74,8 @@ router.post("/", async (req, res) => {
         return;
       }
 
-      res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
-      res.cookie('REFRESH_TOKEN', REFRESH_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)});
+      res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: false, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
+      res.cookie('REFRESH_TOKEN', REFRESH_TOKEN, {sameSite: "none", secure: false, httpOnly: true, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)});
       res.status(200).json({
         "success_message": "Login success",
         "success_code": 132,

@@ -24,7 +24,6 @@ const spotLimitBuy = async (id, pair, quantity, price, userId) => {
     newCryptocurrencyBalance,
     id
   )
-  console.log(result)
 } 
 
 const insertSpotByLimit = async(pair, quantity, price, userId, newSpotBalance, id) => {
@@ -54,6 +53,14 @@ const insertSpotByLimit = async(pair, quantity, price, userId, newSpotBalance, i
       WHERE id = $1;`,
       values: [id]
     });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      history_spot ("pair", "type", "quantity", "price", "userId") 
+      VALUES ($1, 'buy', $2, $3, $4);`,
+      values: [pair, quantity, purchasePrice, userId]
+    }); 
 
     await pool.query('COMMIT');
   } catch (error) {

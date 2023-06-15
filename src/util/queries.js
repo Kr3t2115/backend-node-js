@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 const closePosition = require('./closePosition');
 const spotLimitBuy = require('./spotLimitBuy');
+const spotLimitSell = require('./spotLimitSell');
 
 // function updating cryptocurrency prices in the database
 const queryCryptoPrices = async (spotPrices, futuresPrices) => {
@@ -35,8 +36,18 @@ const querySpotLimit = async(pair, price) => {
     })
     if(result.rowCount){
       for (const position of result.rows) {
+        console.log(position);
         if(position.type == 'buy'){
           spotLimitBuy(
+            position.id,
+            position.pair,
+            position.quantity,
+            position.price,
+            position.userId
+          )
+        }
+        else if(position.type == 'sell'){
+          spotLimitSell(
             position.id,
             position.pair,
             position.quantity,

@@ -8,6 +8,7 @@ const buyCryptoByMarket = require("./market/buyCrypto");
 const sellCryptoByMarket = require("./market/sellCrypto");
 
 const buyCryptoByLimit = require("./limit/buyCrypto");
+const sellCryptoByLimit = require("./limit/sellCrypto");
 
 
 router.use("/balance", spotBalance);
@@ -17,6 +18,7 @@ router.use("/market", buyCryptoByMarket);
 router.use("/market", sellCryptoByMarket);
 
 router.use("/limit", buyCryptoByLimit);
+router.use("/limit", sellCryptoByLimit);
 
 
 module.exports = router;
