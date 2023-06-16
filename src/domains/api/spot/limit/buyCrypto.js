@@ -122,7 +122,7 @@ router.post("/buy/:pair", async (req, res) => {
   }
 });
 
-router.get("/buy/close/:id", async (req, res) => {
+router.get("/close/:id", async (req, res) => {
   try {
     const order = await getLimitOrder(req.params.id, req.user.id);    
 
@@ -136,8 +136,18 @@ router.get("/buy/close/:id", async (req, res) => {
 
     const wallet = await getUserWallet(req.user.id);
 
-    const newAccountBalance = wallet.balance + order.price;
-    const closeOrder = await closeLimitOrder(req.params.id, req.user.id, newAccountBalance);
+    let newAccountBalance = wallet.balance;
+    let newCryptocurrencyBalance = wallet.spotBalance;
+
+    if(order.type == 'buy'){
+      newAccountBalance = wallet.balance + order.price;
+    }else{
+      let cryptoQuantity = Number(wallet.spotBalance[order.pair]) + Number(order.quantity);
+      cryptoQuantity = cryptoQuantity.toFixed(1)
+      newCryptocurrencyBalance[order.pair] = cryptoQuantity;
+    }
+
+    const closeOrder = await closeLimitOrder(req.params.id, req.user.id, newAccountBalance, newCryptocurrencyBalance);
 
     if(!closeOrder){
       res.status(404).json({

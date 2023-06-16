@@ -67,7 +67,7 @@ const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBa
   }
 }
 
-const closeLimitOrder = async(id, userId, newAccountBalance) => {
+const closeLimitOrder = async(id, userId, newAccountBalance, newCryptocurrencyBalance) => {
   try {
     await pool.query('BEGIN');
 
@@ -82,9 +82,9 @@ const closeLimitOrder = async(id, userId, newAccountBalance) => {
     await pool.query({
       rowMode: 'object',
       text: `UPDATE wallet 
-      SET "balance" = $1
-      WHERE "userId" = $2;`,
-      values: [newAccountBalance, userId]
+      SET "balance" = $1, "spotBalance" = $2
+      WHERE "userId" = $3;`,
+      values: [newAccountBalance, newCryptocurrencyBalance, userId]
     });
 
     await pool.query('COMMIT');
