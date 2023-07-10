@@ -21,6 +21,37 @@ const getPosition = async(id, userId) => {
   }
 }
 
+const insertLimitPosition = async(pair, type, quantity, leverage, price, takeProfit, stopLoss, userId, newAccountBalance) => {
+  try {
+    await pool.query('BEGIN');
+
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      futures_limit_orders ("pair", "type", "quantity", "leverage", "price", "takeProfit", "stopLoss", "userId") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id;`,
+      values: [pair, type, quantity, leverage, price, takeProfit, stopLoss, userId]
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet 
+      SET "balance"=$1
+      WHERE "userId"=$2;`,
+      values: [newAccountBalance, userId]
+    });
+
+    await pool.query('COMMIT');
+
+    return true;    
+  } catch (error) {   
+    await pool.query('ROLLBACK'); 
+    console.log(error)
+    return false;
+  }
+}
+
 // function responsible for adding a new item to the database, and updating the user's wallet
 const insertPosition = async(pair, type, quantity, leverage, purchasePrice, takeProfit, stopLoss, userId, liquidationPrice, newAccountBalance, newFutureBalance) => {
   try {
@@ -155,4 +186,4 @@ const deletePosition = async (id, userId, type, newAccountBalance, newFutureBala
   return true;
 };
 
-module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL}
+module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition}

@@ -2,6 +2,7 @@ const pool = require('../config/db');
 const closePosition = require('./closePosition');
 const spotLimitBuy = require('./spotLimitBuy');
 const spotLimitSell = require('./spotLimitSell');
+const openLimitFutures = require('./openLimitFutures');
 
 // function updating cryptocurrency prices in the database
 const queryCryptoPrices = async (spotPrices, futuresPrices) => {
@@ -55,6 +56,38 @@ const querySpotLimit = async(pair, price) => {
             position.userId
           )
         }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const queryFuturesLimit = async(pair, price) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_orders 
+      WHERE pair = $1
+      AND ("type" = 'LONG' AND("price" >= $2)) 
+      OR ("type" = 'SHORT' AND("price" <= $2))`,
+      values: [pair, price]
+    })
+    if(result.rowCount){
+      for (const position of result.rows) {
+        console.log(position);
+        openLimitFutures(
+          position.id,
+          position.pair,
+          position.type,
+          position.quantity,
+          position.price,
+          position.leverage,
+          position.takeProfit,
+          position.stopLoss,
+          position.userId
+        )
       }
     }
   } catch (error) {
@@ -119,4 +152,4 @@ const queryLiquidation = async (pair, price) => {
   } 
 }
 
-module.exports = {queryCryptoPrices, queryLiquidation, querySpotLimit};
+module.exports = {queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit};
