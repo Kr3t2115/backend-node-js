@@ -13,7 +13,8 @@ const spotLimitBuy = async (id, pair, quantity, price, userId) => {
   if(newCryptocurrencyBalance[pair] == null){
     newCryptocurrencyBalance[pair] = quantity;
   }else{
-    newCryptocurrencyBalance[pair] = newCryptocurrencyBalance[pair] + quantity;
+    let cryptoQuantity = Number(quantity) + Number(wallet.spotBalance[pair]);
+    newCryptocurrencyBalance[pair] = cryptoQuantity.toFixed(1);
   }
 
   const result = await insertSpotByLimit(
@@ -59,7 +60,7 @@ const insertSpotByLimit = async(pair, quantity, price, userId, newSpotBalance, i
       text: `INSERT INTO 
       history_spot ("pair", "type", "quantity", "price", "userId") 
       VALUES ($1, 'buy', $2, $3, $4);`,
-      values: [pair, quantity, purchasePrice, userId]
+      values: [pair, quantity, price, userId]
     }); 
 
     await pool.query('COMMIT');
