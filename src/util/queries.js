@@ -4,6 +4,76 @@ const spotLimitBuy = require('./spotLimitBuy');
 const spotLimitSell = require('./spotLimitSell');
 const openLimitFutures = require('./openLimitFutures');
 
+const queryAllWallets = async () => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM wallet;`,
+    })
+    if(result.rowCount >= 1){
+      return result.rows;
+    }
+    return false
+  } catch (error) {
+    return false;
+  }
+}
+
+const queryPositions = async (userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM futures_positions
+      WHERE "userId" = $1;`,
+      values: [userId]
+    })
+    if(result.rowCount >= 1){
+      return result.rows;
+    }
+    return false
+  } catch (error) {
+    return false;
+  }
+}
+
+const getLimitSpot = async (userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM spot_limit_orders
+      WHERE "userId" = $1;`,
+      values: [userId]
+    })
+    if(result.rowCount >= 1){
+      return result.rows;
+    }
+    return false
+  } catch (error) {
+    return false;
+  }
+}
+
+const getLimitFutures = async (userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT *
+      FROM futures_limit_orders
+      WHERE "userId" = $1;`,
+      values: [userId]
+    })
+    if(result.rowCount >= 1){
+      return result.rows;
+    }
+    return false
+  } catch (error) {
+    return false;
+  }
+}
+
 // function updating cryptocurrency prices in the database
 const queryCryptoPrices = async (spotPrices, futuresPrices) => {
   try {
@@ -152,4 +222,4 @@ const queryLiquidation = async (pair, price) => {
   } 
 }
 
-module.exports = {queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit};
+module.exports = {queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit, queryAllWallets, queryPositions, getLimitSpot, getLimitFutures};

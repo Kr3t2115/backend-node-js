@@ -1,4 +1,4 @@
-const { queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit } = require('./queries');
+const { queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit, queryAllWallets, getLimitSpot, queryPositions, getLimitFutures } = require('./queries');
 const {WebSocket, WebSocketServer} = require('ws');
 const express = require("express");
 const router = express.Router();
@@ -103,6 +103,46 @@ const cryptoPrices = async () =>{
     }, 2000);
 
   });
+
+  setInterval(async () => {
+    const keys = Object.keys(pairFuturesPrices);
+    const wallets = await queryAllWallets();
+    for(i = 0; wallets.length > i; i++){
+      const positions = await queryPositions(wallets[i].userId);
+      let predictedBalance = 0;
+      predictedBalance += wallets[i].balance
+
+      for (const key of keys) {
+        if(wallets[i].spotBalance[key]){
+          predictedBalance += Number(wallets[i].spotBalance[key] * pairSpotPrices[key])
+        }
+      }
+
+      for(x = 0; positions.length > x; x++){
+        if(positions[x].type == "LONG"){
+          predictedBalance += positions[x].quantity * positions[x].purchasePrice + (pairFuturesPrices[positions[x].pair] - positions[x].purchasePrice) * positions[x].leverage * positions[x].quantity
+        }else{
+          predictedBalance += positions[x].quantity * positions[x].purchasePrice + (positions[x].purchasePrice - pairFuturesPrices[positions[x].pair]) * positions[x].leverage * positions[x].quantity
+        }
+      }
+      
+      const limitSpot = await getLimitSpot(wallets[i].userId)
+
+      for(z = 0; limitSpot.length > z; z++){
+        if(limitSpot[z].type == "buy"){
+          predictedBalance += limitSpot[z].price * limitSpot[z].quantity
+        }else{
+          predictedBalance += pairSpotPrices[limitSpot[z].pair] * limitSpot[z].quantity
+        }
+      }
+
+      const limitFutures = await getLimitFutures(wallets[i].userId)
+
+      for(z = 0; limitFutures.length > z; z++){
+        predictedBalance += limitFutures[z].price * limitFutures[z].quantity
+      }
+    }
+  }, 4500);
 
   // function that updates the database and closes positions after take profit, stop loss and liquidation
   setTimeout(async function run(){
