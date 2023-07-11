@@ -19,6 +19,6 @@ router.use("/market", sellCryptoByMarket);
 
 router.use("/limit", buyCryptoByLimit);
 router.use("/limit", sellCryptoByLimit);
-router.use("/close", closeByLimit);
+router.use("/limit", closeByLimit);
 
 module.exports = router;

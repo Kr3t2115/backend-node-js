@@ -116,7 +116,6 @@ const getLimitOrder = async(id, userId) => {
   }
 }
 
-
 const updatePosition = async(cryptoQuantity, purchasePrice, pair, userId, newAccountBalance, newCryptoBalance, quantity, selling_price) => {
   try {
     await pool.query('BEGIN');

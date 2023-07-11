@@ -21,6 +21,26 @@ const getPosition = async(id, userId) => {
   }
 }
 
+const getLimitOrder = async(id, userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_orders
+      WHERE "userId"=$1 AND "id"=$2;`,
+      values: [userId, id]
+    });
+  
+    if(result.rowCount == 1){
+      return result.rows[0];
+    }
+    return false;  
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
 const insertLimitPosition = async(pair, type, quantity, leverage, price, takeProfit, stopLoss, userId, newAccountBalance) => {
   try {
     await pool.query('BEGIN');
@@ -186,4 +206,33 @@ const deletePosition = async (id, userId, type, newAccountBalance, newFutureBala
   return true;
 };
 
-module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition}
+const closeLimitOrder = async(id, userId, newAccountBalance) => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM 
+      futures_limit_orders
+      WHERE id = $1 AND "userId" = $2 ;`,
+      values: [id, userId]
+      });
+      
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE wallet 
+      SET "balance" = $1
+      WHERE "userId" = $2;`,
+      values: [newAccountBalance, userId]
+    });
+
+    await pool.query('COMMIT');
+    return true;
+  } catch (error) {
+    await pool.query('ROLLBACK'); 
+    console.log(error)
+    return false;
+  }
+}
+
+module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder}

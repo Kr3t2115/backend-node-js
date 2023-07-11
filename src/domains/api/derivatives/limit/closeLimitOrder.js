@@ -17,18 +17,20 @@ router.get("/close/:id", async (req, res) => {
 
     const wallet = await getUserWallet(req.user.id);
 
-    let newAccountBalance = wallet.balance;
-    let newCryptocurrencyBalance = wallet.spotBalance;
-
-    if(order.type == 'buy'){
-      newAccountBalance = wallet.balance + order.price * order.quantity;
-    }else{
-      let cryptoQuantity = Number(wallet.spotBalance[order.pair]) + Number(order.quantity);
-      cryptoQuantity = cryptoQuantity.toFixed(1)
-      newCryptocurrencyBalance[order.pair] = cryptoQuantity;
+    if (!wallet){
+      res.status(404).json({
+        "error_message": "There was a problem retrieving the user's wallet",
+        "error_code": 101
+      });
+      return;
     }
 
-    const closeOrder = await closeLimitOrder(req.params.id, req.user.id, newAccountBalance, newCryptocurrencyBalance);
+    let newAccountBalance = wallet.balance;
+    // let newCryptocurrencyBalance = wallet.spotBalance;
+
+    newAccountBalance = wallet.balance + order.price * order.quantity;
+
+    const closeOrder = await closeLimitOrder(req.params.id, req.user.id, newAccountBalance);
 
     if(!closeOrder){
       res.status(404).json({

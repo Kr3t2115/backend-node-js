@@ -33,13 +33,14 @@ router.post("/open/:pair", async(req, res) => {
     return;
   }
 
-  if(data.type == 'long' && pairPrice <= data.price){
+  if(data.type == 'LONG' && pairPrice <= data.price){
     res.status(404).json({
       "error_message": "Price you entered does not allow you to create a position",
       "error_code": 100
     });
     return;
-  }else if(data.type == 'short' && pairPrice >= data.price){
+  }
+  if(data.type == 'SHORT' && data.price <= pairPrice){
     res.status(404).json({
       "error_message": "Price you entered does not allow you to create a position",
       "error_code": 100
