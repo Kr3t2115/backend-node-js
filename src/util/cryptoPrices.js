@@ -1,6 +1,7 @@
-const { queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit, queryAllWallets, getLimitSpot, queryPositions, getLimitFutures } = require('./queries');
+const { queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit, queryAllWallets, getLimitSpot, queryPositions, getLimitFutures, insertPredictedBalance } = require('./queries');
 const {WebSocket, WebSocketServer} = require('ws');
 const express = require("express");
+const cron = require('node-cron');
 const router = express.Router();
 
 let pairFuturesPrices = {}
@@ -104,7 +105,8 @@ const cryptoPrices = async () =>{
 
   });
 
-  setInterval(async () => {
+  cron.schedule('0 0 0 * * *', async () => {
+    console.log('xd')
     const keys = Object.keys(pairFuturesPrices);
     const wallets = await queryAllWallets();
     for(i = 0; wallets.length > i; i++){
@@ -141,8 +143,9 @@ const cryptoPrices = async () =>{
       for(z = 0; limitFutures.length > z; z++){
         predictedBalance += limitFutures[z].price * limitFutures[z].quantity
       }
+      await insertPredictedBalance(predictedBalance, wallets[i].userId)
     }
-  }, 4500);
+  });
 
   // function that updates the database and closes positions after take profit, stop loss and liquidation
   setTimeout(async function run(){

@@ -20,6 +20,25 @@ const queryAllWallets = async () => {
   }
 }
 
+const insertPredictedBalance = async(balance, userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      predicted_balance ("balance", "userId") 
+      VALUES ($1, $2)`,
+      values: [balance, userId]
+    })
+    if(result.rowCount >= 1){
+      return result.rows;
+    }
+    return false
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
 const queryPositions = async (userId) => {
   try {
     const result = await pool.query({
@@ -222,4 +241,4 @@ const queryLiquidation = async (pair, price) => {
   } 
 }
 
-module.exports = {queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit, queryAllWallets, queryPositions, getLimitSpot, getLimitFutures};
+module.exports = {queryCryptoPrices, queryLiquidation, querySpotLimit, queryFuturesLimit, queryAllWallets, queryPositions, getLimitSpot, getLimitFutures, insertPredictedBalance};

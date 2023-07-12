@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { getUser } = require('./queries');
+const profilePicture = require('./profile/profilePicture');
 
 /**
  * GET /api/user/logout
@@ -42,5 +43,7 @@ router.get("/ping", (req, res) => {
     "response": "pong"
   });
 });
+
+router.use("/profile", profilePicture)
 
 module.exports = router;
