@@ -13,80 +13,84 @@ router.get("/", (req, res) => {
     res.status(200).json({spot: cryptoSpotData, futures: cryptoFuturesData})
 })
 
-const cryptoPrices = async () =>{
-
-  const wsFuturesBinance = new WebSocket('wss://fstream.binance.com/ws');
-
+const startWebSockets = () => {
+  // Connect to futures WebSocket
+  wsFuturesBinance = new WebSocket('wss://fstream.binance.com/ws');
   wsFuturesBinance.on('error', console.error);
-  
+
   wsFuturesBinance.on('open', function open() {
-    wsFuturesBinance.send(JSON.stringify({
-      "method": "SUBSCRIBE",
-      "params":
-      [
-      "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker", "solusdt@ticker", "dotusdt@ticker", "ltcusdt@ticker", "arbusdt@ticker", "galusdt@ticker"
-      ],
-      "id": 1
-    }))
+      wsFuturesBinance.send(JSON.stringify({
+          "method": "SUBSCRIBE",
+          "params": [
+              "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker", "solusdt@ticker", "dotusdt@ticker", "ltcusdt@ticker", "arbusdt@ticker", "galusdt@ticker"
+          ],
+          "id": 1
+      }));
   });
-  
-  
 
-  // creating objects based on the response from the binance api
   wsFuturesBinance.on('message', function message(data) {
-      let futuresData = data.toString()
-      futuresData = JSON.parse(futuresData)
-      if(futuresData.e){
-        pairFuturesPrices[futuresData.s] = futuresData.c
-        cryptoFuturesData[futuresData.s] = {
-          "pair": futuresData.s,
-          "openPrice": futuresData.o,
-          "lastPrice": futuresData.c,
-          "highPrice": futuresData.h,
-          "lowPrice": futuresData.l,
-          "priceChange": futuresData.p,
-          "percentChange": futuresData.P,
-          "volume": futuresData.q
-        }
+      let futuresData = data.toString();
+      futuresData = JSON.parse(futuresData);
+      if (futuresData.e) {
+          pairFuturesPrices[futuresData.s] = futuresData.c;
+          cryptoFuturesData[futuresData.s] = {
+              "pair": futuresData.s,
+              "openPrice": futuresData.o,
+              "lastPrice": futuresData.c,
+              "highPrice": futuresData.h,
+              "lowPrice": futuresData.l,
+              "priceChange": futuresData.p,
+              "percentChange": futuresData.P,
+              "volume": futuresData.q
+          };
       }
-    });
-
-  const wsSpotBinance = new WebSocket('wss://stream.binance.com:9443/ws');
-
-  wsSpotBinance.on('error', console.error);
-  
-  wsSpotBinance.on('open', function open() {
-    wsSpotBinance.send(JSON.stringify({
-      "method": "SUBSCRIBE",
-      "params":
-      [
-      "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker", "solusdt@ticker", "dotusdt@ticker", "ltcusdt@ticker", "arbusdt@ticker", "galusdt@ticker"
-      ],
-      "id": 1
-    }))
   });
-  
 
+  // Connect to spot WebSocket
+  wsSpotBinance = new WebSocket('wss://stream.binance.com:9443/ws');
+  wsSpotBinance.on('error', console.error);
 
-  // creating objects based on the response from the binance api
+  wsSpotBinance.on('open', function open() {
+      wsSpotBinance.send(JSON.stringify({
+          "method": "SUBSCRIBE",
+          "params": [
+              "btcusdt@ticker", "ethusdt@ticker", "bnbusdt@ticker", "etcusdt@ticker", "dogeusdt@ticker", "xrpusdt@ticker", "linkusdt@ticker", "solusdt@ticker", "dotusdt@ticker", "ltcusdt@ticker", "arbusdt@ticker", "galusdt@ticker"
+          ],
+          "id": 1
+      }));
+  });
+
   wsSpotBinance.on('message', function message(data) {
-      let spotData = data.toString()
-      spotData = JSON.parse(spotData)
-      if(spotData.e){
-        pairSpotPrices[spotData.s] = spotData.c
-        cryptoSpotData[spotData.s] = {
-          "pair": spotData.s,
-          "openPrice": spotData.o,
-          "lastPrice": spotData.c,
-          "highPrice": spotData.h,
-          "lowPrice": spotData.l,
-          "priceChange": spotData.p,
-          "percentChange": spotData.P,
-          "volume": spotData.q
-        }
+      let spotData = data.toString();
+      spotData = JSON.parse(spotData);
+      if (spotData.e) {
+          pairSpotPrices[spotData.s] = spotData.c;
+          cryptoSpotData[spotData.s] = {
+              "pair": spotData.s,
+              "openPrice": spotData.o,
+              "lastPrice": spotData.c,
+              "highPrice": spotData.h,
+              "lowPrice": spotData.l,
+              "priceChange": spotData.p,
+              "percentChange": spotData.P,
+              "volume": spotData.q
+          };
       }
-    });
+  });
+};
 
+const restartWebSocket = () => {
+  wsFuturesBinance.close();
+  wsSpotBinance.close();
+  startWebSockets();
+};
+
+const cryptoPrices = async () =>{
+  startWebSockets();
+  
+  const restartInterval = 12 * 60 * 60 * 1000;
+  setInterval(restartWebSocket, restartInterval);
+  
   // creating a websocket server that will send basic data about cryptocurrencies to the frontend
   const wsServer = new WebSocketServer({ port: 8081 });
 
