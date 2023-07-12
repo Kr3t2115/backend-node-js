@@ -5,7 +5,7 @@ const getUser = async(userId) => {
   try {
     const result = await pool.query({
       rowMode: 'object',
-      text: `SELECT firstname, lastname, email
+      text: `SELECT firstname, lastname, email, "profilePicture"
       FROM users 
       WHERE "id" = $1;`,
       values: [userId]
