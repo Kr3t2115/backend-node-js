@@ -39,6 +39,13 @@ const insertSpotByLimit = async(pair, quantity, price, userId, newSpotBalance, i
       values: [pair, quantity, price, userId]
     });
     
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE spot_limit_history 
+      SET "status" = $1 
+      WHERE "userId" = $2 AND "orderId" = $3;`,
+      values: ['filled', userId, id]
+    });
 
     await pool.query({
       rowMode: 'object',

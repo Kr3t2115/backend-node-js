@@ -41,6 +41,22 @@ const getLimitOrder = async(id, userId) => {
   }
 }
 
+const getLimitOrders = async(userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_orders
+      WHERE "userId"=$1`,
+      values: [userId]
+    });  
+    return result.rows;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
 const insertLimitPosition = async(pair, type, quantity, leverage, price, takeProfit, stopLoss, userId, newAccountBalance) => {
   try {
     await pool.query('BEGIN');
@@ -235,4 +251,4 @@ const closeLimitOrder = async(id, userId, newAccountBalance) => {
   }
 }
 
-module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder}
+module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder, getLimitOrders}

@@ -33,7 +33,7 @@ router.post("/buy/:pair", async (req, res) => {
     const decimalPlaces = numberOfDecimalPlaces(req.body.quantity);
 
     // checking whether the user has provided the amount of cryptocurrency he wants to buy
-    if(!req.body.quantity || decimalPlaces > 1 || req.body.quantity < 0){
+    if(!req.body.quantity || decimalPlaces > 1 || req.body.quantity <= 0){
       res.status(404).json({
         "error_message": "There was a problem with the specified amount to buy cryptocurrencies.",
         "error_code": 108

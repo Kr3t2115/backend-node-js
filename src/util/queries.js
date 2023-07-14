@@ -115,18 +115,18 @@ const queryCryptoPrices = async (spotPrices, futuresPrices) => {
 
 const querySpotLimit = async(pair, price) => {
   try {
+    
     const result = await pool.query({
       rowMode: 'object',
       text: `SELECT * 
       FROM spot_limit_orders 
       WHERE pair = $1
-      AND ("type" = 'buy' AND("price" >= $2)) 
-      OR ("type" = 'sell' AND("price" <= $2))`,
+      AND (("type" = 'buy' AND("price" >= $2)) 
+      OR ("type" = 'sell' AND("price" <= $2)))`,
       values: [pair, price]
     })
     if(result.rowCount){
       for (const position of result.rows) {
-        console.log(position);
         if(position.type == 'buy'){
           spotLimitBuy(
             position.id,
@@ -159,8 +159,8 @@ const queryFuturesLimit = async(pair, price) => {
       text: `SELECT * 
       FROM futures_limit_orders 
       WHERE pair = $1
-      AND ("type" = 'LONG' AND("price" >= $2)) 
-      OR ("type" = 'SHORT' AND("price" <= $2))`,
+      AND (("type" = 'LONG' AND("price" >= $2)) 
+      OR ("type" = 'SHORT' AND("price" <= $2)))`,
       values: [pair, price]
     })
     if(result.rowCount){

@@ -42,13 +42,22 @@ const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBa
   try {
     await pool.query('BEGIN');
 
-    await pool.query({
+    const result = await pool.query({
       rowMode: 'object',
       text: `INSERT INTO 
       spot_limit_orders ("pair", "quantity", "price", "type", "userId") 
-      VALUES ($1, $2, $3, $4, $5);`,
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id;`,
       values: [pair, quantity, price, type, userId]
-      });
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      spot_limit_history ("pair", "quantity", "price", "type", "status", "userId", "orderId") 
+      VALUES ($1, $2, $3, 'buy', 'active', $4, $5);`,
+      values: [pair, quantity, price, userId, result.rows[0].id]
+    });
       
     await pool.query({
       rowMode: 'object',
@@ -79,6 +88,14 @@ const closeLimitOrder = async(id, userId, newAccountBalance, newCryptocurrencyBa
       values: [id, userId]
       });
       
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE spot_limit_history 
+      SET "status" = $1 
+      WHERE "userId" = $2 AND "orderId" = $3;`,
+      values: ['canceled', userId, id]
+    });
+
     await pool.query({
       rowMode: 'object',
       text: `UPDATE wallet 
@@ -115,6 +132,26 @@ const getLimitOrder = async(id, userId) => {
     return false;
   }
 }
+
+const getLimitOrders = async(userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_orders 
+      WHERE "userId" = $1;`,
+      values: [userId]
+    });
+  
+    if(result.rowCount >= 0){
+      return result.rows;
+    }
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
 
 const updatePosition = async(cryptoQuantity, purchasePrice, pair, userId, newAccountBalance, newCryptoBalance, quantity, selling_price) => {
   try {
@@ -220,4 +257,4 @@ const getPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder };
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder, getLimitOrders };
