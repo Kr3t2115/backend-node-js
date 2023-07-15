@@ -1,4 +1,5 @@
 const pool = require('../../../config/db')
+const moment = require('moment-timezone');
 
 // function that retrieves information about an item with a given id from the database
 const getPosition = async(id, userId) => {
@@ -57,6 +58,22 @@ const getLimitOrders = async(userId) => {
   }
 }
 
+const getLimitHistory = async(userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_history
+      WHERE "userId"=$1`,
+      values: [userId]
+    });  
+    return result.rows;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
 const insertLimitPosition = async(pair, type, quantity, leverage, price, takeProfit, stopLoss, userId, newAccountBalance) => {
   try {
     await pool.query('BEGIN');
@@ -68,6 +85,14 @@ const insertLimitPosition = async(pair, type, quantity, leverage, price, takePro
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id;`,
       values: [pair, type, quantity, leverage, price, takeProfit, stopLoss, userId]
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      futures_limit_history ("type", "pair", "quantity", "price", "leverage", "takeProfit", "stopLoss", "userId", "orderId", "status") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`,
+      values: [type, pair, quantity, price, leverage, takeProfit, stopLoss, userId, result.rows[0].id, "active"]
     });
 
     await pool.query({
@@ -233,7 +258,18 @@ const closeLimitOrder = async(id, userId, newAccountBalance) => {
       WHERE id = $1 AND "userId" = $2 ;`,
       values: [id, userId]
       });
-      
+    
+    const serverTime = moment().tz('Europe/Warsaw');
+    const timestamp = serverTime.format('YYYY-MM-DD HH:mm:ss.SSS');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE futures_limit_history 
+      SET "status" = $1, "endDate" = $2 
+      WHERE "userId" = $3 AND "orderId" = $4;`,
+      values: ['canceled', timestamp, userId, id]
+    });
+
     await pool.query({
       rowMode: 'object',
       text: `UPDATE wallet 
@@ -251,4 +287,4 @@ const closeLimitOrder = async(id, userId, newAccountBalance) => {
   }
 }
 
-module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder, getLimitOrders}
+module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitHistory}

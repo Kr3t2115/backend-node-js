@@ -1,4 +1,5 @@
 const getUserWallet = require('../services/getUserWallet');
+const moment = require('moment-timezone');
 const pool = require('../config/db');
 
 const openLimitFutures = async (id, pair, type, quantity, price, leverage, takeProfit, stopLoss, userId) => {
@@ -65,6 +66,17 @@ const insertPosition = async(id, pair, type, quantity, leverage, purchasePrice, 
       SET "futureBalance"=$1 
       WHERE "userId"=$2;`,
       values: [newFutureBalance, userId]
+    });
+
+    const serverTime = moment().tz('Europe/Warsaw');
+    const timestamp = serverTime.format('YYYY-MM-DD HH:mm:ss.SSS');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE futures_limit_history 
+      SET "status" = $1, "endDate" = $2 
+      WHERE "userId" = $3 AND "orderId" = $4;`,
+      values: ['filled', timestamp, userId, id]
     });
 
     await pool.query({

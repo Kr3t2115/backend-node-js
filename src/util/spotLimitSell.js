@@ -1,4 +1,5 @@
 const getUserWallet = require('../services/getUserWallet');
+const moment = require('moment-timezone');
 const pool = require('../config/db');
 
 const spotLimitSell = async (id, pair, quantity, price, userId) => {
@@ -38,6 +39,17 @@ const insertSpotByLimit = async(pair, quantity, price, userId, newAccountBalance
       SET "balance" = $1 
       WHERE "userId" = $2;`,
       values: [newAccountBalance, userId]
+    });
+
+    const serverTime = moment().tz('Europe/Warsaw');
+    const timestamp = serverTime.format('YYYY-MM-DD HH:mm:ss.SSS');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE spot_limit_history 
+      SET "status" = $1, "endDate" = $2 
+      WHERE "userId" = $3 AND "orderId" = $4;`,
+      values: ['filled', timestamp, userId, id]
     });
 
     await pool.query({

@@ -1,20 +1,20 @@
 const express = require("express");
-const { getLimitOrders } = require("../queries");
+const { getLimitOrdersHistory } = require("../queries");
 const router = express.Router();
 
-router.get("/orders", async (req, res) => {
+router.get("/history", async (req, res) => {
   try {
-    const orders = await getLimitOrders(req.user.id);    
+    const history = await getLimitOrdersHistory(req.user.id);    
 
-    if(!orders){
+    if(!history){
       res.status(404).json({
-        "error_message": "There was a problem with finding an order with the given id",
+        "error_message": "There was a problem with finding an history with the given user id",
         "error_code": 110
       });
       return;
     }
 
-    res.status(200).json(orders);
+    res.status(200).json(history);
   } catch (error) {
     console.log(error);
     res.status(404).json({

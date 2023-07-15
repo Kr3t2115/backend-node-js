@@ -1,4 +1,5 @@
 const pool = require('../../../config/db');
+const moment = require('moment-timezone');
 
 // function responsible for adding items and updating the user's portfolio in the database
 const insertPosition = async(pair, quantity, purchasePrice, userId, newAccountBalance, newCryptoBalance) => {
@@ -55,8 +56,8 @@ const insertLimitOrder = async(pair, quantity, price, userId, type, newAccountBa
       rowMode: 'object',
       text: `INSERT INTO 
       spot_limit_history ("pair", "quantity", "price", "type", "status", "userId", "orderId") 
-      VALUES ($1, $2, $3, 'buy', 'active', $4, $5);`,
-      values: [pair, quantity, price, userId, result.rows[0].id]
+      VALUES ($1, $2, $3, $4, 'active', $5, $6);`,
+      values: [pair, quantity, price, type, userId, result.rows[0].id]
     });
       
     await pool.query({
@@ -86,14 +87,17 @@ const closeLimitOrder = async(id, userId, newAccountBalance, newCryptocurrencyBa
       spot_limit_orders
       WHERE id = $1 AND "userId" = $2 ;`,
       values: [id, userId]
-      });
-      
+    });
+    
+    const serverTime = moment().tz('Europe/Warsaw');
+    const timestamp = serverTime.format('YYYY-MM-DD HH:mm:ss.SSS');
+
     await pool.query({
       rowMode: 'object',
       text: `UPDATE spot_limit_history 
-      SET "status" = $1 
-      WHERE "userId" = $2 AND "orderId" = $3;`,
-      values: ['canceled', userId, id]
+      SET "status" = $1, "endDate" = $2
+      WHERE "userId" = $3 AND "orderId" = $4;`,
+      values: ['canceled', timestamp, userId, id]
     });
 
     await pool.query({
@@ -139,6 +143,25 @@ const getLimitOrders = async(userId) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM spot_limit_orders 
+      WHERE "userId" = $1;`,
+      values: [userId]
+    });
+  
+    if(result.rowCount >= 0){
+      return result.rows;
+    }
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitOrdersHistory = async(userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_history 
       WHERE "userId" = $1;`,
       values: [userId]
     });
@@ -257,4 +280,4 @@ const getPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder, getLimitOrders };
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitOrdersHistory };

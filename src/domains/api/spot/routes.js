@@ -11,6 +11,8 @@ const buyCryptoByLimit = require("./limit/buyCrypto");
 const sellCryptoByLimit = require("./limit/sellCrypto");
 const closeByLimit = require('./limit/closeLimit');
 const limitOrders = require('./limit/limitOrders');
+const limitHistory = require('./limit/limitHistory');
+
 
 router.use("/balance", spotBalance);
 router.use("/balance", spotBalanceByPair);
@@ -22,5 +24,6 @@ router.use("/limit", buyCryptoByLimit);
 router.use("/limit", sellCryptoByLimit);
 router.use("/limit", closeByLimit);
 router.use("/limit", limitOrders);
+router.use("/limit", limitHistory);
 
 module.exports = router;
