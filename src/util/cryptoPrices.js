@@ -110,7 +110,6 @@ const cryptoPrices = async () =>{
   });
 
   cron.schedule('0 0 0 * * *', async () => {
-    console.log('xd')
     const keys = Object.keys(pairFuturesPrices);
     const wallets = await queryAllWallets();
     for(i = 0; wallets.length > i; i++){

@@ -92,5 +92,27 @@ const getLimitFutures = async (userId) => {
   }
 }
 
+const getPredictedBalance = async (limit, userId) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM predicted_balance 
+      WHERE "userId" = $2
+      ORDER BY date 
+      DESC LIMIT $1;`,
+      values: [limit, userId]
+    })
 
-module.exports = { getFuturesPositions, getSpotPrices, getFuturesPrices, getLimitSpot, getLimitFutures };
+    if(result.rowCount >= 1){
+      return result.rows;
+    }
+    return false
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+
+module.exports = { getFuturesPositions, getSpotPrices, getFuturesPrices, getLimitSpot, getLimitFutures, getPredictedBalance };
