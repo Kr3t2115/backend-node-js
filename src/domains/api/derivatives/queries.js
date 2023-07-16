@@ -64,8 +64,66 @@ const getLimitHistory = async(userId) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM futures_limit_history
-      WHERE "userId"=$1`,
+      WHERE "userId"=$1
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
       values: [userId]
+    });  
+    return result.rows;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitHistoryConditional = async(userId, from) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_history
+      WHERE "userId"=$1
+      AND id < $2
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
+      values: [userId, from]
+    });  
+    return result.rows;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitHistoryByPair = async(userId, pair) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_history
+      WHERE "userId"=$1 AND "pair" LIKE '%' || $2 || '%'
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
+      values: [userId, pair]
+    });  
+    return result.rows;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitHistoryByPairConditional = async(userId, pair, from) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_history
+      WHERE "userId"=$1 AND "pair" LIKE '%' || $2 || '%'
+      AND id < $3
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
+      values: [userId, pair, from]
     });  
     return result.rows;
   } catch (error) {
@@ -287,4 +345,4 @@ const closeLimitOrder = async(id, userId, newAccountBalance) => {
   }
 }
 
-module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitHistory}
+module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitHistory, getLimitHistoryByPair, getLimitHistoryConditional, getLimitHistoryByPairConditional}

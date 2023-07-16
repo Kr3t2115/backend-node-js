@@ -162,8 +162,75 @@ const getLimitOrdersHistory = async(userId) => {
       rowMode: 'object',
       text: `SELECT * 
       FROM spot_limit_history 
-      WHERE "userId" = $1;`,
+      WHERE "userId" = $1
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
       values: [userId]
+    });
+  
+    if(result.rowCount >= 0){
+      return result.rows;
+    }
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitOrdersHistoryConditional = async(userId, from) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_history 
+      WHERE "userId" = $1
+      AND id < $2
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
+      values: [userId, from]
+    });
+  
+    if(result.rowCount >= 0){
+      return result.rows;
+    }
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitOrdersHistoryByPair = async(userId, pair) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_history 
+      WHERE "userId" = $1 AND "pair" LIKE '%' || $2 || '%'
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
+      values: [userId, pair]
+    });
+  
+    if(result.rowCount >= 0){
+      return result.rows;
+    }
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
+const getLimitOrdersHistoryByPairConditional = async(userId, pair, from) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_history 
+      WHERE "userId" = $1 AND "pair" LIKE '%' || $2 || '%'
+      AND id < $3
+      ORDER BY "startDate" DESC
+      LIMIT 20;`,
+      values: [userId, pair, from]
     });
   
     if(result.rowCount >= 0){
@@ -280,4 +347,4 @@ const getPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitOrdersHistory };
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitOrdersHistory, getLimitOrdersHistoryConditional, getLimitOrdersHistoryByPair, getLimitOrdersHistoryByPairConditional };
