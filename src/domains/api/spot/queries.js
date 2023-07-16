@@ -156,6 +156,25 @@ const getLimitOrders = async(userId) => {
   }
 }
 
+const getLimitOrdersByPair = async(userId, pair) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM spot_limit_orders 
+      WHERE "userId" = $1 AND "pair" LIKE '%' || $2 || '%';`,
+      values: [userId, pair]
+    });
+  
+    if(result.rowCount >= 0){
+      return result.rows;
+    }
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
 const getLimitOrdersHistory = async(userId) => {
   try {
     const result = await pool.query({
@@ -310,13 +329,13 @@ const deletePosition = async(pair, userId, newAccountBalance, newCryptoBalance, 
       values: [newAccountBalance, newCryptoBalance, userId]
     });
 
-   await pool.query({
-          rowMode: 'object',
-          text: `INSERT INTO 
-          history_spot ("pair", "type", "quantity", "price", "userId") 
-          VALUES ($1, 'sell', $2, $3, $4);`,
-          values: [pair, quantity, selling_price, userId]
-      });
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO 
+      history_spot ("pair", "type", "quantity", "price", "userId") 
+      VALUES ($1, 'sell', $2, $3, $4);`,
+      values: [pair, quantity, selling_price, userId]
+    });
 
     await pool.query('COMMIT');
     return true;
@@ -347,4 +366,4 @@ const getPostition = async(pair, userId) => {
   }
 }
 
-module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitOrdersHistory, getLimitOrdersHistoryConditional, getLimitOrdersHistoryByPair, getLimitOrdersHistoryByPairConditional };
+module.exports = { insertPosition, getPostition, deletePosition, updatePosition, insertLimitOrder, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitOrdersHistory, getLimitOrdersHistoryConditional, getLimitOrdersHistoryByPair, getLimitOrdersHistoryByPairConditional, getLimitOrdersByPair };

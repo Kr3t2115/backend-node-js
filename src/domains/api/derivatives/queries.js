@@ -58,6 +58,22 @@ const getLimitOrders = async(userId) => {
   }
 }
 
+const getLimitOrdersByPair = async(userId, pair) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM futures_limit_orders
+      WHERE "userId"= $1 AND "pair" LIKE '%' || $2 || '%';`,
+      values: [userId, pair]
+    });  
+    return result.rows;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
+}
+
 const getLimitHistory = async(userId) => {
   try {
     const result = await pool.query({
@@ -345,4 +361,4 @@ const closeLimitOrder = async(id, userId, newAccountBalance) => {
   }
 }
 
-module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitHistory, getLimitHistoryByPair, getLimitHistoryConditional, getLimitHistoryByPairConditional}
+module.exports = {insertPosition, updatePosition, getPosition, deletePosition, updateTPSL, insertLimitPosition, getLimitOrder, closeLimitOrder, getLimitOrders, getLimitHistory, getLimitHistoryByPair, getLimitHistoryConditional, getLimitHistoryByPairConditional, getLimitOrdersByPair}
