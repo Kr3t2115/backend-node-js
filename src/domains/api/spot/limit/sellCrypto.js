@@ -42,7 +42,9 @@ router.post("/sell/:pair", async (req, res) => {
 
     const price = req.body.price;
 
-    if(price <= pairPrice){
+    const decimalPlacesPrice = numberOfDecimalPlaces(price)
+
+    if(Number(price) <= pairPrice || decimalPlacesPrice > 5){
       res.status(404).json({
         "error_message": "There is a problem with the specified price to make order",
         "error_code": 109

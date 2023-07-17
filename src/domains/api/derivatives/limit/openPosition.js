@@ -33,14 +33,16 @@ router.post("/open/:pair", async(req, res) => {
     return;
   }
 
-  if(data.type == 'LONG' && pairPrice <= data.price){
+  const decimalPlacesPrice = numberOfDecimalPlaces(price)
+
+  if(data.type == 'LONG' && pairPrice <= Number(data.price) || decimalPlacesPrice > 5){
     res.status(404).json({
       "error_message": "Price you entered does not allow you to create a position",
       "error_code": 100
     });
     return;
   }
-  if(data.type == 'SHORT' && data.price <= pairPrice){
+  if(data.type == 'SHORT' && Number(data.price) <= pairPrice || decimalPlacesPrice > 5){
     res.status(404).json({
       "error_message": "Price you entered does not allow you to create a position",
       "error_code": 100
