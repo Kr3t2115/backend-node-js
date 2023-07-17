@@ -64,7 +64,7 @@ router.post("/buy/:pair", async (req, res) => {
     const wallet = await getUserWallet(req.user.id);
 
     // checking whether the user can afford this purchase
-    if(pairPrice * req.body.quantity > wallet.balance){
+    if(price * req.body.quantity > wallet.balance){
       res.status(404).json({
         "error_message": "There was a problem with the purchase of cryptocurrencies, you cannot afford to buy the amount",
         "error_code": 110
