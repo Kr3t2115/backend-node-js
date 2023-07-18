@@ -53,8 +53,8 @@ router.post("/open/:pair", async(req, res) => {
   // calculate liquidation price
   const liquidationPrice = 
     data.type === "LONG"
-      ? Number(pairPrice) - Number(pairPrice) / Number(data.leverage)
-      : data.leverage > 1 ? Number(pairPrice) + Number(pairPrice) / Number(data.leverage) : Number(pairPrice) * 10;
+      ? Number(data.price) - Number(data.price) / Number(data.leverage)
+      : data.leverage > 1 ? Number(data.price) + Number(data.price) / Number(data.leverage) : Number(data.price) * 10;
 
   // function that returns true if there was a problem verifying the data provided by the user
   const validateError = validateData(
