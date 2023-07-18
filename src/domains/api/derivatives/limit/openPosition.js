@@ -3,7 +3,7 @@ const { validateData } = require("../controller");
 const { insertLimitPosition } = require("../queries");
 const getPairPrice = require("../../../../services/getFuturesPairPrice");
 const getUserWallet = require("../../../../services/getUserWallet");
-
+const numberOfDecimalPlaces = require('../../../../util/numberOfDecimalPlaces')
 const router = express.Router();
 
 // route responsible for opening futures positions
@@ -33,16 +33,16 @@ router.post("/open/:pair", async(req, res) => {
     return;
   }
 
-  const decimalPlacesPrice = numberOfDecimalPlaces(price)
+  const decimalPlacesPrice = numberOfDecimalPlaces(data.price)
 
-  if(data.type == 'LONG' && pairPrice <= Number(data.price) || decimalPlacesPrice > 5){
+  if(data.type == 'LONG' && (pairPrice <= Number(data.price) || decimalPlacesPrice > 5 || Number(data.price) == 0)){
     res.status(404).json({
       "error_message": "Price you entered does not allow you to create a position",
       "error_code": 100
     });
     return;
   }
-  if(data.type == 'SHORT' && Number(data.price) <= pairPrice || decimalPlacesPrice > 5){
+  if(data.type == 'SHORT' && (Number(data.price) <= pairPrice || decimalPlacesPrice > 5 || Number(data.price) == 0)){
     res.status(404).json({
       "error_message": "Price you entered does not allow you to create a position",
       "error_code": 100
@@ -59,7 +59,7 @@ router.post("/open/:pair", async(req, res) => {
   // function that returns true if there was a problem verifying the data provided by the user
   const validateError = validateData(
     data, 
-    pairPrice, 
+    Number(data.price), 
     liquidationPrice
   );
 
