@@ -109,7 +109,8 @@ const cryptoPrices = async () =>{
 
   });
 
-  cron.schedule('0 0 0 * * *', async () => {
+  cron.schedule('0 0 * * *', async () => {
+    try {
     const keys = Object.keys(pairFuturesPrices);
     const wallets = await queryAllWallets();
     for(i = 0; wallets.length > i; i++){
@@ -117,11 +118,13 @@ const cryptoPrices = async () =>{
       let predictedBalance = 0;
       predictedBalance += wallets[i].balance
 
-      for (const key of keys) {
-        if(wallets[i].spotBalance[key]){
-          predictedBalance += Number(wallets[i].spotBalance[key] * pairSpotPrices[key])
+      if(wallets[i].spotBalance){
+        for (const key of keys) {
+          if(wallets[i].spotBalance[key]){
+            predictedBalance += Number(wallets[i].spotBalance[key] * pairSpotPrices[key])
+          }
         }
-      }
+      } 
 
       for(x = 0; positions.length > x; x++){
         if(positions[x].type == "LONG"){
@@ -148,6 +151,9 @@ const cryptoPrices = async () =>{
       }
       await insertPredictedBalance(predictedBalance, wallets[i].userId)
     }
+    } catch (error) {
+      console.log(error)
+    }
   });
 
   // function that updates the database and closes positions after take profit, stop loss and liquidation
@@ -157,7 +163,7 @@ const cryptoPrices = async () =>{
     for (const key of keys) {
       await queryLiquidation(key, pairFuturesPrices[key]);
       await querySpotLimit(key, pairSpotPrices[key]);
-      await queryFuturesLimit(key, pairSpotPrices[key]);
+      await queryFuturesLimit(key, pairFuturesPrices[key]);
     }
     setTimeout(run, 2000)
   }, 2000);

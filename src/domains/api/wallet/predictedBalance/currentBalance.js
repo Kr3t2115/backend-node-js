@@ -7,17 +7,22 @@ router.get("/balance", async (req, res) => {
   try {
     const wallet = await getUserWallet(req.user.id);
     const positions = await getFuturesPositions(req.user.id);
-    const keys = Object.keys(wallet.spotBalance);
+    let keys;
+    if (wallet && wallet.spotBalance) {
+      keys = Object.keys(wallet.spotBalance);
+    }
     const spotPrices = await getSpotPrices();
     const futuresPrices = await getFuturesPrices();
 
     let predictedBalance = 0;
     predictedBalance += wallet.balance   
  
-    for (const key of keys) {
-      predictedBalance += Number(wallet.spotBalance[key] * spotPrices[key])
+    if(wallet && wallet.spotBalance){
+      for (const key of keys) {
+        predictedBalance += Number(wallet.spotBalance[key] * spotPrices[key])
+      }
     }
-    
+
     for(x = 0; positions.length > x; x++){
       if(positions[x].type == "LONG"){
         predictedBalance += positions[x].quantity * positions[x].purchasePrice + (futuresPrices[positions[x].pair] - positions[x].purchasePrice) * positions[x].leverage * positions[x].quantity
