@@ -1,16 +1,16 @@
 const pool = require('../../config/db');
 
 // new user registration function
-const registerUser = async (firstname, lastname, email, hashedPassword) => {
+const registerUser = async (firstname, lastname, email, hashedPassword, username) => {
   try {
     await pool.query('BEGIN');
 
     const { rows: [user] } = await pool.query({
       rowMode: 'object',
-      text: `INSERT INTO users ("firstname", "lastname", "email", "password") 
-      VALUES ($1, $2, $3, $4) 
+      text: `INSERT INTO users ("firstname", "lastname", "email", "password", "username") 
+      VALUES ($1, $2, $3, $4, $5) 
       RETURNING id;`,
-      values: [firstname, lastname, email, hashedPassword]
+      values: [firstname, lastname, email, hashedPassword, username]
     });
 
     await pool.query({
@@ -90,4 +90,26 @@ const queryAccount = async (email) => {
   }
 }
 
-module.exports = { registerUser, queryAccount, insertRefreshToken, getRefreshToken };
+
+// function that checks whether the account with the given e-mail exists
+const queryAccountUsername = async (username) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM users 
+      WHERE username = $1;`,
+      values: [username]
+    });
+  
+    if(result.rowCount == 1){
+      return result.rows[0];
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+module.exports = { registerUser, queryAccount, insertRefreshToken, getRefreshToken, queryAccountUsername };

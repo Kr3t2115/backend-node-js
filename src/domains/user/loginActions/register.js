@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, queryAccount, insertRefreshToken } = require('../queries');
+const { registerUser, queryAccount, insertRefreshToken, queryAccountUsername } = require('../queries');
 const { validateRegister, hashPassword, generateJWT } = require('../controller');
 
 /**
@@ -46,7 +46,8 @@ router.post("/", async (req, res) => {
       "firstname": req.body.firstname,
       "lastname": req.body.lastname,
       "email": req.body.email.toLowerCase(),
-      "password": req.body.password
+      "password": req.body.password,
+      "username": req.body.username
     }
 
     // function that validate register data, returns error code if validation rejected, or false if validation passed
@@ -68,17 +69,28 @@ router.post("/", async (req, res) => {
       });
       return;
     }
+    
+    // function that checks if the entered email is in the database, returns false if email not found, else returns true
+    const usernameBusy = await queryAccountUsername(registerData.username);
+    if(usernameBusy || registerData.username.length > 64){
+      res.status(409).json({
+        "error_message": "There was a problem with adding the account to the system because the username was taken, check the error_code for more information",
+        "error_code": 121
+      });
+      return;
+    }
 
     // function that hashes a password, returns a hash
     const hashedPassword = hashPassword(registerData.password);
     // function that insert user data into the database, returns true if added successfully otherwise returns false
-    const registerPassed = await registerUser(registerData.firstname, registerData.lastname, registerData.email, hashedPassword);
+    const registerPassed = await registerUser(registerData.firstname, registerData.lastname, registerData.email, hashedPassword, registerData.username);
 
     if(!registerPassed){
       res.status(500).json({
         "error_message": "There was a problem with adding the account to the system because the email address was taken, check the error_code for more information",
         "error_code": 122
       });
+      return;
     }
 
     // function that returns jwt token. Accepts values added to payload, such as email and user id
