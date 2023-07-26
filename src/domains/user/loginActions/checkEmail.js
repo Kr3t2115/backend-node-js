@@ -6,7 +6,7 @@ const { queryAccount } = require('../queries');
 router.post("/email", async (req, res) => {
   try {
     const data = {
-      email: req.body.email
+      email: req.body.email.toLowerCase()
     }
 
     // function that asks the database if the user with the given e-mail exists

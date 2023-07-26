@@ -1,4 +1,5 @@
 const express = require("express");
+const sendEmail = require('./sendEmail');
 const router = express.Router();
 const { registerUser, queryAccount, insertRefreshToken, queryAccountUsername } = require('../queries');
 const { validateRegister, hashPassword, generateJWT } = require('../controller');
@@ -80,10 +81,30 @@ router.post("/", async (req, res) => {
       return;
     }
 
+    function generateRandomSixDigitNumber() {
+      const min = 100000;
+      const max = 999999;
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    const code = generateRandomSixDigitNumber();
+
+    try {
+      const result = await sendEmail(registerData.email, code);
+      console.log(result);
+      // Do something with the result if needed
+    } catch (error) {
+      res.status(500).json({
+        "error_message": "There was a problem with sending the confirmation code, please try again later, or with another email address",
+        "error_code": 123
+      });
+      return;
+    }
+
     // function that hashes a password, returns a hash
     const hashedPassword = hashPassword(registerData.password);
     // function that insert user data into the database, returns true if added successfully otherwise returns false
-    const registerPassed = await registerUser(registerData.firstname, registerData.lastname, registerData.email, hashedPassword, registerData.username);
+    const registerPassed = await registerUser(registerData.firstname, registerData.lastname, registerData.email, hashedPassword, registerData.username, code);
 
     if(!registerPassed){
       res.status(500).json({
@@ -93,23 +114,9 @@ router.post("/", async (req, res) => {
       return;
     }
 
-    // function that returns jwt token. Accepts values added to payload, such as email and user id
-    const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(registerData.email, registerPassed);
-    const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
-    if(!addRefreshToken){
-      res.status(404).json({
-        "error_message": "Error with refresh token",
-        "error_code": 190
-      });
-      return;
-    }
-    res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
-    res.cookie('REFRESH_TOKEN', REFRESH_TOKEN, {sameSite: "none", secure: true, httpOnly: true, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)});
     res.status(200).json({
-      "success_message": "The account has been successfully registered",
-      "success_code": 131,
-      "ACCESS_TOKEN": ACCESS_TOKEN,
-      "REFRESH_TOKEN": REFRESH_TOKEN
+      "success_message": "The account has been successfully registered, now please active your account",
+      "success_code": 131
     });
 
   } catch (error) {

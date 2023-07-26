@@ -45,7 +45,7 @@ router.patch('/picture', upload.single('profilePicture'), async (req, res) => {
       fs.unlinkSync(filePath);
       res.status(400).json({
         "error_message": "The uploaded photo must be 128x128 pixels",
-        "error_code": 111
+        "error_code": 112
       });
       return;
     }
@@ -55,7 +55,7 @@ router.patch('/picture', upload.single('profilePicture'), async (req, res) => {
       fs.unlinkSync(filePath);
       res.status(404).json({
         "error_message": "There was a problem with adding your photo",
-        "error_code": 111
+        "error_code": 113
       });
       return;
     }
@@ -68,7 +68,7 @@ router.patch('/picture', upload.single('profilePicture'), async (req, res) => {
         }
       });  
     }
-    res.status(404).json({
+    res.status(200).json({
       "success_message": "Success",
       "success_code": 311
     });

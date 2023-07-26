@@ -1,16 +1,24 @@
 const pool = require('../../config/db');
 
 // new user registration function
-const registerUser = async (firstname, lastname, email, hashedPassword, username) => {
+const registerUser = async (firstname, lastname, email, hashedPassword, username, code) => {
   try {
     await pool.query('BEGIN');
 
     const { rows: [user] } = await pool.query({
       rowMode: 'object',
-      text: `INSERT INTO users ("firstname", "lastname", "email", "password", "username") 
-      VALUES ($1, $2, $3, $4, $5) 
+      text: `INSERT INTO users ("firstname", "lastname", "email", "password", "username", "isActive") 
+      VALUES ($1, $2, $3, $4, $5, $6) 
       RETURNING id;`,
-      values: [firstname, lastname, email, hashedPassword, username]
+      values: [firstname, lastname, email, hashedPassword, username, 'false']
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO account_confirm ("userId", "code") 
+      VALUES ($1, $2) 
+      RETURNING id;`,
+      values: [user.id, code]
     });
 
     await pool.query({
@@ -112,4 +120,74 @@ const queryAccountUsername = async (username) => {
   }
 }
 
-module.exports = { registerUser, queryAccount, insertRefreshToken, getRefreshToken, queryAccountUsername };
+const checkCode = async (userId, code) => {
+  try{
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `SELECT * 
+      FROM account_confirm 
+      WHERE "userId" = $1 AND code = $2;`,
+      values: [userId, code]
+    });
+
+    if(result.rowCount == 1){
+      return result.rows[0];
+    }
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+const renewCode = async (userId, code) => {
+  try{
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `UPDATE account_confirm
+      SET code = $1
+      WHERE "userId" = $2;`,
+      values: [code, userId]
+    });
+
+    if(result.rowCount == 1){
+      return true;
+    }
+
+    // console.log(result)
+    return false;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+const activeAccount = async (userId) => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE users
+      SET "isActive" = true
+      WHERE id = $1;`,
+      values: [userId]
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM account_confirm 
+      WHERE "userId" = $1`,
+      values: [userId]
+    });
+
+    await pool.query('COMMIT');
+    return true;
+  } catch (error) {
+    await pool.query('ROLLBACK'); 
+    console.log(error);
+    return false;
+  }
+}
+
+module.exports = { registerUser, queryAccount, insertRefreshToken, getRefreshToken, queryAccountUsername, checkCode, activeAccount, renewCode };

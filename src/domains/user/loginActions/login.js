@@ -62,33 +62,41 @@ router.post("/", async (req, res) => {
     // function that compares the entered password with the user's password in the database, returns true if the passwords match, else return false
     const passwordMatch = comparePassword(req.body.password, accountExists.password);
     
-   if(passwordMatch){
-      const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
-
-      const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
-      if(!addRefreshToken){
-        res.status(404).json({
-          "error_message": "Error with refresh token",
-          "error_code": 190
-        });
-        return;
-      }
-
-      res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: false, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
-      res.cookie('REFRESH_TOKEN', REFRESH_TOKEN, {sameSite: "none", secure: false, httpOnly: true, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)});
-      res.status(200).json({
-        "success_message": "Login success",
-        "success_code": 132,
-        "ACCESS_TOKEN": ACCESS_TOKEN,
-        "REFRESH_TOKEN": REFRESH_TOKEN
-      });
-    }else{
+    if(!passwordMatch){
       res.status(404).json({
         "error_message": "We cant compare password with that email",
         "error_code": 191
       });
       return;
     }
+
+    if(accountExists.isActive == false){
+      res.status(404).json({
+        "error_message": "Your account is not active. Please activate your account before logging in",
+        "error_code": 191
+      });
+      return;
+    }
+
+    const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
+
+    const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
+    if(!addRefreshToken){
+      res.status(404).json({
+        "error_message": "Error with refresh token",
+        "error_code": 190
+      });
+      return;
+    }
+
+    res.cookie('ACCESS_TOKEN', ACCESS_TOKEN, {sameSite: "none", secure: false, httpOnly: true, expires: new Date(Date.now() + 5 * 60 * 1000)});
+    res.cookie('REFRESH_TOKEN', REFRESH_TOKEN, {sameSite: "none", secure: false, httpOnly: true, expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)});
+    res.status(200).json({
+      "success_message": "Login success",
+      "success_code": 132,
+      "ACCESS_TOKEN": ACCESS_TOKEN,
+      "REFRESH_TOKEN": REFRESH_TOKEN
+    });
 
   } catch (error) {
     console.log(error);
