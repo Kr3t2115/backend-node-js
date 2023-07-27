@@ -1,5 +1,5 @@
 const express = require("express");
-const sendEmail = require('./sendEmail');
+const { sendConfirmEmail } = require('./sendEmail');
 const router = express.Router();
 const { registerUser, queryAccount, insertRefreshToken, queryAccountUsername } = require('../queries');
 const { validateRegister, hashPassword, generateJWT } = require('../controller');
@@ -90,7 +90,7 @@ router.post("/", async (req, res) => {
     const code = generateRandomSixDigitNumber();
 
     try {
-      const result = await sendEmail(registerData.email, code);
+      const result = await sendConfirmEmail(registerData.email, code);
       console.log(result);
       // Do something with the result if needed
     } catch (error) {

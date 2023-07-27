@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const sendEmail = require('./sendEmail');
+const { sendConfirmEmail } = require('./sendEmail');
 const { queryAccount, renewCode } = require('../queries');
 const { validateLogin, comparePassword } = require('../controller');
 
@@ -60,7 +60,7 @@ router.post("/resend", async (req, res) => {
     const code = generateRandomSixDigitNumber();
 
     try {
-      const result = await sendEmail(data.email, code);
+      const result = await sendConfirmEmail(data.email, code);
       console.log(result);
       // Do something with the result if needed
     } catch (error) {

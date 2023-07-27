@@ -3,12 +3,12 @@ const jwt = require('jsonwebtoken');
 const express = require("express");
 const router = express.Router();
 
-router.get("/token", (req, res) => {
+router.get("/token", async (req, res) => {
     
   const token = req.cookies.REFRESH_TOKEN
     
   try {
-    const isToken = getRefreshToken(token);
+    const isToken = await getRefreshToken(token);
     if(!isToken){
       res.status(403).json({
         "error": "error1"
@@ -23,12 +23,12 @@ router.get("/token", (req, res) => {
         })
         return;
       }
-      console.log(data)
+
       const payload = {
         id: data.id,
         email: data.email
       }
-      console.log(payload)
+
       const ACCESS_TOKEN = jwt.sign(payload, 
         process.env.ACCESS_KEY, 
         {

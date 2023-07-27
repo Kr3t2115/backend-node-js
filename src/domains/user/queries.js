@@ -36,14 +36,29 @@ const registerUser = async (firstname, lastname, email, hashedPassword, username
   }
 }
 
-const insertRefreshToken = async (token) => {
+const insertConfirmationCode = async (userId, code) => {
+  try {
+    const result = await pool.query({
+      rowMode: 'object',
+      text: `INSERT INTO account_confirm ("userId", "code") 
+      VALUES ($1, $2);`,
+      values: [userId, code]
+    });
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+const insertRefreshToken = async (token, userId) => {
   try{
     const result = await pool.query({
       rowMode: 'object',
       text: `INSERT INTO refresh_tokens
-      (token) VALUES
-      ($1)`,
-      values: [token]
+      (token, "userId") VALUES
+      ($1, $2)`,
+      values: [token, userId]
     });
 
     if(result.rowCount == 1){
@@ -140,14 +155,59 @@ const checkCode = async (userId, code) => {
   }
 }
 
+const updatePassword = async (userId, newPassword) => {
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query({
+      rowMode: 'object',
+      text: `UPDATE users
+      SET "password" = $1
+      WHERE id = $2;`,
+      values: [newPassword, userId]
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM account_confirm 
+      WHERE "userId" = $1`,
+      values: [userId]
+    });
+
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM refresh_tokens 
+      WHERE "userId" = $1`,
+      values: [userId]
+    });
+    
+    await pool.query('COMMIT');  
+    return true;
+  
+  } catch (error) {
+
+    await pool.query('ROLLBACK'); 
+    console.log(error);
+    return false;
+  }
+}
+
 const renewCode = async (userId, code) => {
   try{
+    await pool.query({
+      rowMode: 'object',
+      text: `DELETE FROM account_confirm 
+      WHERE "userId" = $1`,
+      values: [userId]
+    });
+
     const result = await pool.query({
       rowMode: 'object',
-      text: `UPDATE account_confirm
-      SET code = $1
-      WHERE "userId" = $2;`,
-      values: [code, userId]
+      text: `INSERT INTO account_confirm
+      ("userId", code) 
+      VALUES ($1, $2)
+      `,
+      values: [userId, code]
     });
 
     if(result.rowCount == 1){
@@ -190,4 +250,4 @@ const activeAccount = async (userId) => {
   }
 }
 
-module.exports = { registerUser, queryAccount, insertRefreshToken, getRefreshToken, queryAccountUsername, checkCode, activeAccount, renewCode };
+module.exports = { registerUser, queryAccount, insertRefreshToken, getRefreshToken, queryAccountUsername, checkCode, activeAccount, renewCode, insertConfirmationCode, updatePassword };

@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { queryAccount, checkCode, activeAccount, insertRefreshToken } = require('../queries');
+const { queryAccount, checkCode, activeAccount, insertRefreshToken, registerUser } = require('../queries');
 const { generateJWT, validateLogin, comparePassword } = require('../controller');
+const { sendWelcomeEmail } = require("./sendEmail");
 
 // route checks if the account with the given email exists
 router.post("/email", async (req, res) => {
@@ -71,9 +72,21 @@ router.post("/email", async (req, res) => {
       return;
     }
 
+    
+    try {
+      const result = await sendWelcomeEmail(data.email, accountExists.username);
+      console.log(result);
+    } catch (error) {
+      res.status(500).json({
+        "error_message": "There was a problem with sending the confirmation code, please try again later, or with another email address",
+        "error_code": 123
+      });
+      return;
+    }
+
     // function that returns jwt token. Accepts values added to payload, such as email and user id
     const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(data.email, accountExists.id);
-    const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
+    const addRefreshToken = insertRefreshToken(REFRESH_TOKEN, accountExists.id);
     if(!addRefreshToken){
       res.status(404).json({
         "error_message": "Error with refresh token",

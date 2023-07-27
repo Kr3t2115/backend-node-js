@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getUser } = require('./queries');
+const { getUser, deleteRefreshToken } = require('./queries');
 const profilePicture = require('./profile/profilePicture');
 const profileUpdate = require('./profile/editProfile');
 
@@ -25,9 +25,14 @@ const profileUpdate = require('./profile/editProfile');
  * }
  */
 // function that logut user
-router.get("/logout", (req, res) => {
+router.get("/logout", async (req, res) => {
+  const token = req.cookies.REFRESH_TOKEN
+
   res.clearCookie('ACCESS_TOKEN', {sameSite: "none", secure: true});
   res.clearCookie('REFRESH_TOKEN', {sameSite: "none", secure: true});
+
+  await deleteRefreshToken(token, req.user.id);
+
   res.json({
     "logout": "wylogowano"
   });
@@ -47,5 +52,6 @@ router.get("/ping", (req, res) => {
 
 router.use("/profile", profilePicture)
 router.use("/profile", profileUpdate)
+
 
 module.exports = router;

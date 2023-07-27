@@ -90,4 +90,24 @@ const updateAccount = async(firstname, lastname, username, userId) => {
   }
 }
 
-module.exports = { getUser, updateProfile, updateAccount, queryAccountUsername };
+const deleteRefreshToken = async(token, userId) => {
+  try{
+  const result = await pool.query({
+    rowMode: 'object',
+    text: `DELETE FROM
+    refresh_tokens
+    WHERE token = $1 AND "userId" = $2`,
+    values: [token, userId]
+  });
+
+  if(result.rowCount == 1){
+    return result.rows[0];
+  }
+  return false;
+} catch (error) {
+  console.log(error)
+  return false;
+}
+}
+
+module.exports = { getUser, updateProfile, updateAccount, queryAccountUsername, deleteRefreshToken };

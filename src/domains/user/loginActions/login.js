@@ -80,7 +80,7 @@ router.post("/", async (req, res) => {
 
     const {ACCESS_TOKEN, REFRESH_TOKEN} = generateJWT(loginData.email, accountExists.id); // function that returns jwt token. Accepts values added to payload, such as email and user id
 
-    const addRefreshToken = insertRefreshToken(REFRESH_TOKEN);
+    const addRefreshToken = insertRefreshToken(REFRESH_TOKEN, accountExists.id);
     if(!addRefreshToken){
       res.status(404).json({
         "error_message": "Error with refresh token",
