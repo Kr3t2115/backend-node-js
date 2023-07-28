@@ -3,7 +3,7 @@ const router = express.Router();
 const { queryAccount } = require('../queries');
 
 // route checks if the account with the given email exists
-router.post("/email", async (req, res) => {
+router.post("/email/login", async (req, res) => {
   try {
     const data = {
       email: req.body.email.toLowerCase()
@@ -12,17 +12,17 @@ router.post("/email", async (req, res) => {
     // function that asks the database if the user with the given e-mail exists
     const accountExists = await queryAccount(data.email)
 
-    if(!accountExists){
+    if(accountExists){
       res.status(404).json({
-        "error_message": "We cant find account with that email",
+        "error_message": "An account with the given email address exists",
         "error_code": 190
       });
       return;
     }
 
-    // if it exists, return code 200
+    // if it does not exists, return code 200
     res.status(200).json({
-      "success_message": "An account with the given email address exists",
+      "success_message": "We cant find account with that email",
       "success_code": 200
     })
 
