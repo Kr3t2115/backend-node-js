@@ -2,9 +2,28 @@ const express = require("express");
 const router = express.Router();
 const { sendConfirmEmail } = require('./sendEmail');
 const { queryAccount, insertConfirmationCode } = require('../queries');
+const jwt = require("jsonwebtoken");
 
 router.post("/password/code", async (req, res) => {
   try {
+    token = req.cookies.ACCESS_TOKEN;
+
+    const isError = jwt.verify(token, process.env.ACCESS_KEY, (err, user) => {
+      if (!err){
+        req.user = user;
+      }else{
+          return true;
+      }
+    });
+    
+    if(isError && !req.body.email){
+      res.status(401).json({
+        "error_message": "No email provided",
+        "error_code": 100
+      });
+    return;
+    }
+        
     const data = {
       email: req.body.email || req.user.email
     };
