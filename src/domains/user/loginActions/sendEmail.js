@@ -1,5 +1,6 @@
 const transporter = require('./../../../config/mail');
 
+// Send email function for welcome new user
 const sendWelcomeEmail = (recipient, username) => {
   return new Promise((resolve, reject) => {
   const mailOptions = {
@@ -67,6 +68,7 @@ const sendWelcomeEmail = (recipient, username) => {
 </html>`,
   };
 
+  // Send email function
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       reject(error);
@@ -77,6 +79,7 @@ const sendWelcomeEmail = (recipient, username) => {
 });
 };
 
+// Send email function for send account confirmation code
 const sendConfirmEmail = (recipient, code) => {
   return new Promise((resolve, reject) => {
   const mailOptions = {
@@ -138,6 +141,7 @@ const sendConfirmEmail = (recipient, code) => {
 </html>`,
   };
 
+  // Send email function
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       reject(error);

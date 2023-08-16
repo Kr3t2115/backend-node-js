@@ -66,7 +66,7 @@ router.post("/", async (req, res) => {
     if(emailBusy){
       res.status(409).json({
         "error_message": "There was a problem with adding the account to the system because the email address was taken, check the error_code for more information",
-        "error_code": 121
+        "error_code": 133
       });
       return;
     }

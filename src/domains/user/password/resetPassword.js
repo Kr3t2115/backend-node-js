@@ -5,11 +5,13 @@ const { queryAccount, checkCode, updatePassword } = require('../queries');
 const { hashPassword, comparePassword } = require('../controller');
 const jwt = require("jsonwebtoken");
 
+// reset password route
 router.post("/password", async (req, res) => {
   try {
-    
+    // Get token from cookies
     token = req.cookies.ACCESS_TOKEN;
 
+    // Check if token is valid
     const isError = jwt.verify(token, process.env.ACCESS_KEY, (err, user) => {
       if (!err){
         req.user = user;
@@ -18,6 +20,7 @@ router.post("/password", async (req, res) => {
       }
     });
     
+    // Check if email is provided
     if(isError && !req.body.email){
       res.status(401).json({
         "error_message": "No email provided",
@@ -26,14 +29,17 @@ router.post("/password", async (req, res) => {
     return;
     }  
       
+    // Define data
     const data = {
       email: req.body.email || req.user.email,
       code: req.body.code,
       password: req.body.password
     };
 
+    // Get user data from database by email
     const user = await queryAccount(data.email);
 
+    // Check if user exists and is active
     if(!user || user.isActive == false){
       res.status(404).json({
         "error_message": "Error on getting user data",
@@ -42,6 +48,7 @@ router.post("/password", async (req, res) => {
       return;
     }
 
+    // Check if password is valid
     if(data.password.length < 8 || !data.password.match(/\d/) || !data.password.match(/[a-z]/) || !data.password.match(/[A-Z]/)){
       res.status(404).json({
         "error_message": "Invalid password",
@@ -50,8 +57,10 @@ router.post("/password", async (req, res) => {
       return;
     }
 
+    // Check if code is valid
     const isCodeValid = await checkCode(user.id, data.code);
 
+    // If code is not valid, return error
     if(!isCodeValid){
       res.status(404).json({
         "error_message": "Invalid code passed",
@@ -60,8 +69,10 @@ router.post("/password", async (req, res) => {
       return;
     }
 
+    // Check if passwords are the same
     const passwordMatch = comparePassword(data.password, user.password);
 
+    // If passwords are the same, return error
     if(passwordMatch){
       res.status(404).json({
         "error_message": "Passwords cant be the same",
@@ -70,10 +81,13 @@ router.post("/password", async (req, res) => {
       return;
     }
 
+    // Hash password
     const hashedPassword = hashPassword(data.password);
 
+    // Update password in database
     const update = await updatePassword(user.id, hashedPassword);
 
+    // If update failed, return error
     if(!update){
       res.status(404).json({
         "error_message": "An unexpected error",
@@ -82,6 +96,7 @@ router.post("/password", async (req, res) => {
       return;
     }
 
+    // Send email with information about password change to user email
     try {
       const result = await sendInformationMail(data.email, user.username);
       console.log(result);
@@ -93,15 +108,18 @@ router.post("/password", async (req, res) => {
       return;
     }
 
+    // Clear cookies
     res.clearCookie('ACCESS_TOKEN', {sameSite: "none", secure: true});
     res.clearCookie('REFRESH_TOKEN', {sameSite: "none", secure: true});
 
+    // Return success message
     res.status(200).json({
       "success_message": "Successfully reset password",
       "success_code": 100
     });
 
   } catch (error) {
+    // If error, return error message
     console.log(error)
     res.status(500).send('An unexpected error');  
   }

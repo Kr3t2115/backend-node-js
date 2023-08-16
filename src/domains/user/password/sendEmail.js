@@ -1,5 +1,6 @@
 const transporter = require('../../../config/mail');
 
+// Send email function for password reset confirmation
 const sendInformationMail = (recipient, username) => {
   return new Promise((resolve, reject) => {
   const mailOptions = {
@@ -61,6 +62,7 @@ const sendInformationMail = (recipient, username) => {
 </html>`,
   };
 
+  // Send email function
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       reject(error);
@@ -71,6 +73,7 @@ const sendInformationMail = (recipient, username) => {
 });
 };
 
+// Send email function for password reset code 
 const sendConfirmEmail = (recipient, code, username) => {
   return new Promise((resolve, reject) => {
   const mailOptions = {
@@ -133,6 +136,7 @@ const sendConfirmEmail = (recipient, code, username) => {
 </html>`,
   };
 
+  // Send email function
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       reject(error);

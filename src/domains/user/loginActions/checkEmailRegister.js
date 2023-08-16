@@ -3,7 +3,7 @@ const router = express.Router();
 const { queryAccount } = require('../queries');
 
 // route checks if the account with the given email exists
-router.post("/email/login", async (req, res) => {
+router.post("/email/register", async (req, res) => {
   try {
     const data = {
       email: req.body.email.toLowerCase()

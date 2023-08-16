@@ -4,9 +4,10 @@ const { sendConfirmEmail } = require('./sendEmail');
 const { queryAccount, renewCode } = require('../queries');
 const { validateLogin, comparePassword } = require('../controller');
 
-// route checks if the account with the given email exists
+// resend confirmation code route
 router.post("/resend", async (req, res) => {
   try {
+    // define data
     const data = {
       email: req.body.email.toLowerCase(),
       password: req.body.password,
@@ -35,6 +36,7 @@ router.post("/resend", async (req, res) => {
     // function that compares the entered password with the user's password in the database, returns true if the passwords match, else return false
     const passwordMatch = comparePassword(req.body.password, accountExists.password);
 
+    // check if password match
     if(!passwordMatch){
       res.status(404).json({
         "error_message": "We cant compare password with that email",
@@ -43,6 +45,7 @@ router.post("/resend", async (req, res) => {
       return;
     }
 
+    // check if account is active
     if(accountExists.isActive == true){
       res.status(404).json({
         "error_message": "Your account is already active",
@@ -51,18 +54,20 @@ router.post("/resend", async (req, res) => {
       return;
     }
 
+    // Function to generate random six digit number
     function generateRandomSixDigitNumber() {
       const min = 100000;
       const max = 999999;
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
     
+    // Generate random six digit number
     const code = generateRandomSixDigitNumber();
 
+    // Send email function
     try {
       const result = await sendConfirmEmail(data.email, code);
       console.log(result);
-      // Do something with the result if needed
     } catch (error) {
       res.status(500).json({
         "error_message": "There was a problem with sending the confirmation code, please try again later, or with another email address",
@@ -71,10 +76,10 @@ router.post("/resend", async (req, res) => {
       return;
     }
 
+    // Insert code to database
     const newCode = await renewCode(accountExists.id, code);
 
-    console.log(newCode)
-
+    // Check if code is inserted
     if(!newCode){
       res.status(404).json({
         "error_message": "An error occurred while generating a new code",
@@ -83,12 +88,14 @@ router.post("/resend", async (req, res) => {
       return;
     }
 
+    // Return success message
     res.status(200).json({
       "success_message": "The new code has been successfully generated",
       "success_code": 131
     });
 
   } catch (error) {
+    // If error, return error message
     console.log(error);
     res.status(404).json({
       "error_message": "An unexpected error has occurred",

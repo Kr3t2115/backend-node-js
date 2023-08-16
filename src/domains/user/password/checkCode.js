@@ -3,8 +3,26 @@ const router = express.Router();
 const { sendInformationMail } = require('./sendEmail');
 const { queryAccount, checkCode, updatePassword } = require('../queries');
 const { hashPassword, comparePassword } = require('../controller');
+const jwt = require("jsonwebtoken");
 
 router.post("/check/code", async (req, res) => {
+  token = req.cookies.ACCESS_TOKEN;
+
+  const isError = jwt.verify(token, process.env.ACCESS_KEY, (err, user) => {
+	if (!err){
+	  req.user = user;
+	}else{
+	  return true;
+    }
+  });
+
+  if(isError && !req.body.email){
+	res.status(401).json({
+	  "error_message": "No email provided",
+	  "error_code": 100
+	});
+	return;
+  }  
   try {
     const data = {
       email: req.body.email || req.user.email,

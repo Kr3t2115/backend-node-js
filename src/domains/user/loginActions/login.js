@@ -73,7 +73,7 @@ router.post("/", async (req, res) => {
     if(accountExists.isActive == false){
       res.status(404).json({
         "error_message": "Your account is not active. Please activate your account before logging in",
-        "error_code": 191
+        "error_code": 201
       });
       return;
     }
