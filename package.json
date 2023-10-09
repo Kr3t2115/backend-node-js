@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run": "node src/index.js"
+    "run": "node src/index.js",
+    "swagger": "node src/swagger.js"
   },
   "author": "",
   "license": "ISC",
@@ -29,5 +30,8 @@
     "socket.io-client": "^4.6.1",
     "sse-node": "^1.0.2",
     "ws": "^8.12.1"
+  },
+  "devDependencies": {
+    "swagger-autogen": "^2.23.6"
   }
 }
